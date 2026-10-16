@@ -1,15 +1,128 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>طقسي | متابعة حالة الطقس</title>
 <style>
-body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#075985,#38bdf8);color:white;text-align:center;padding:40px 15px;min-height:100vh;box-sizing:border-box}main{max-width:500px;margin:30px auto;background:#ffffff22;padding:25px;border-radius:24px}input,button{padding:13px;border:0;border-radius:10px;margin:5px;font-size:16px}button{background:#facc15;color:#172554;font-weight:bold}#result{margin-top:20px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#075985,#38bdf8);color:#fff;min-height:100vh;padding:20px}
+main{max-width:700px;margin:auto}
+header{text-align:center;padding:20px 0}
+h1{font-size:38px;margin:10px}
+header p{font-size:18px}
+.search{display:flex;gap:8px;margin:20px 0}
+input,button{border:0;border-radius:12px;padding:15px;font-size:17px}
+input{flex:1;min-width:0}
+button{background:#facc15;color:#172554;font-weight:bold;cursor:pointer}
+.card{background:#ffffff20;border:1px solid #ffffff40;border-radius:22px;padding:22px;margin:15px 0;text-align:center}
+#city{font-size:25px}
+#icon{font-size:65px}
+#temp{font-size:55px;font-weight:bold;margin:8px}
+#desc{font-size:21px}
+.details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.detail{background:#ffffff20;padding:15px 5px;border-radius:14px}
+.detail strong{display:block;font-size:20px;margin-top:8px}
+.forecast{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.day{background:#ffffff20;border-radius:12px;padding:12px 3px;font-size:14px}
+.day .emoji{font-size:27px;margin:8px 0}
+small{display:block;margin-top:20px;line-height:1.8}
+@media(max-width:420px){body{padding:12px}.card{padding:15px}.forecast{grid-template-columns:repeat(3,1fr)}.details{gap:6px}.detail{font-size:13px}}
 </style>
 </head>
 <body>
-<main><h1>☀️ طقسي</h1><h2>برنامج متابعة حالة الطقس</h2><p>ابحث عن مدينة لمعرفة الطقس</p><input id="city" placeholder="اكتب اسم المدينة"><button onclick="weather()">بحث</button><div id="result">أهلًا بيك في موقع طقسي</div></main>
-<script>function weather(){let c=document.getElementById("city").value.trim();document.getElementById("result").textContent=c?"تم تسجيل بحثك عن "+c+" — سيتم تفعيل بيانات الطقس الحقيقية في الخطوة التالية.":"اكتب اسم المدينة أولًا";}</script>
+<main>
+<header>
+<h1>☀️ طقسي</h1>
+<p>برنامج متابعة حالة الطقس</p>
+</header>
+
+<div class="search">
+<input id="cityInput" value="القاهرة" placeholder="اكتب اسم المدينة">
+<button onclick="searchCity()">بحث</button>
+</div>
+
+<div id="message" role="status">جاري تحميل الطقس...</div>
+
+<section class="card">
+<div id="city">القاهرة</div>
+<div id="icon">🌤️</div>
+<div id="temp">--°</div>
+<div id="desc">حالة الطقس</div>
+<p>أعلى درجة: <span id="max">--</span>° | أقل درجة: <span id="min">--</span>°</p>
+</section>
+
+<section class="details">
+<div class="detail">💧 الرطوبة<strong id="humidity">--%</strong></div>
+<div class="detail">💨 سرعة الرياح<strong id="wind">--</strong></div>
+<div class="detail">🌡️ الحرارة المحسوسة<strong id="feels">--°</strong></div>
+</section>
+
+<section class="card">
+<h2>📅 توقعات الأيام القادمة</h2>
+<div class="forecast" id="forecast"></div>
+</section>
+
+<small>مصدر البيانات: Open-Meteo. درجات الحرارة بالسيلسيوس. يحتاج الموقع إلى اتصال بالإنترنت.</small>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function weatherText(code){
+ if(code===0)return ["سماء صافية","☀️"];
+ if(code===1)return ["غائم جزئياً","🌤️"];
+ if(code===2)return ["غائم جزئياً","⛅"];
+ if(code===3)return ["غائم","☁️"];
+ if([45,48].includes(code))return ["شبورة","🌫️"];
+ if([51,53,55,56,57].includes(code))return ["رذاذ","🌦️"];
+ if([61,63,65,66,67,80,81,82].includes(code))return ["أمطار","🌧️"];
+ if([71,73,75,77,85,86].includes(code))return ["ثلوج","❄️"];
+ if([95,96,99].includes(code))return ["عواصف رعدية","⛈️"];
+ return ["حالة الطقس","🌤️"];
+}
+
+async function searchCity(){
+ const name=$("cityInput").value.trim();
+ if(!name){$("message").textContent="اكتب اسم المدينة أولاً";return}
+ $("message").textContent="جاري البحث عن "+name+"...";
+ try{
+  const geo=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name)+"&count=1&language=ar&format=json");
+  if(!geo.ok)throw Error("تعذر الاتصال بخدمة البحث");
+  const places=await geo.json();
+  if(!places.results||!places.results.length)throw Error("لم يتم العثور على المدينة. جرّب كتابة اسمها بالإنجليزية.");
+  const place=places.results[0];
+  const url="https://api.open-meteo.com/v1/forecast?latitude="+place.latitude+"&longitude="+place.longitude+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5";
+  const response=await fetch(url);
+  if(!response.ok)throw Error("تعذر تحميل بيانات الطقس");
+  const data=await response.json();
+  $("city").textContent=place.name+(place.country?"، "+place.country:"");
+  $("temp").textContent=Math.round(data.current.temperature_2m)+"°";
+  $("humidity").textContent=data.current.relative_humidity_2m+"%";
+  $("wind").textContent=data.current.wind_speed_10m+" كم/س";
+  $("feels").textContent=Math.round(data.current.apparent_temperature)+"°";
+  $("max").textContent=Math.round(data.daily.temperature_2m_max[0]);
+  $("min").textContent=Math.round(data.daily.temperature_2m_min[0]);
+  const desc=weatherText(data.current.weather_code);
+  $("icon").textContent=desc[1];
+  $("desc").textContent=desc[0];
+  $("forecast").innerHTML="";
+  const days=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+  data.daily.time.forEach((date,i)=>{
+   const d=new Date(date+"T12:00:00");
+   const w=weatherText(data.daily.weather_code[i]);
+   const el=document.createElement("div");
+   el.className="day";
+   el.innerHTML="<div>"+(i===0?"اليوم":days[d.getDay()])+"</div><div class='emoji'>"+w[1]+"</div><div>"+w[0]+"</div><p>"+Math.round(data.daily.temperature_2m_max[i])+"°</p><div>"+Math.round(data.daily.temperature_2m_min[i])+"°</div>";
+   $("forecast").appendChild(el);
+  });
+  $("message").textContent="تم تحديث بيانات الطقس بنجاح ✅";
+ }catch(e){
+  $("message").textContent=e.message||"حدث خطأ. تأكد من اتصال الإنترنت وحاول مرة أخرى.";
+ }
+}
+searchCity();
+</script>
 </body>
 </html>
