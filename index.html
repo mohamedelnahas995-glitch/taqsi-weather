@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طقسي | متابعة حالة الطقس</title>
+<style>
+body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#075985,#38bdf8);color:white;text-align:center;padding:40px 15px;min-height:100vh;box-sizing:border-box}main{max-width:500px;margin:30px auto;background:#ffffff22;padding:25px;border-radius:24px}input,button{padding:13px;border:0;border-radius:10px;margin:5px;font-size:16px}button{background:#facc15;color:#172554;font-weight:bold}#result{margin-top:20px}
+</style>
+</head>
+<body>
+<main><h1>☀️ طقسي</h1><h2>برنامج متابعة حالة الطقس</h2><p>ابحث عن مدينة لمعرفة الطقس</p><input id="city" placeholder="اكتب اسم المدينة"><button onclick="weather()">بحث</button><div id="result">أهلًا بيك في موقع طقسي</div></main>
+<script>function weather(){let c=document.getElementById("city").value.trim();document.getElementById("result").textContent=c?"تم تسجيل بحثك عن "+c+" — سيتم تفعيل بيانات الطقس الحقيقية في الخطوة التالية.":"اكتب اسم المدينة أولًا";}</script>
+</body>
+</html>
