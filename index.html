@@ -252,7 +252,9 @@ footer {
   </header>
 
   <form class="search" id="searchForm">
-    <input id="cityInput" placeholder="اكتب اسم المدينة، مثال: شبين الكوم" aria-label="اسم المدينة">
+    <input id="cityInput"
+      placeholder="اكتب اسم المدينة أو المحافظة أو الدولة"
+      aria-label="اسم المدينة">
     <button class="primary" type="submit">بحث 🔎</button>
   </form>
 
@@ -265,7 +267,7 @@ footer {
         <h2 id="cityName">القاهرة</h2>
         <div class="muted" id="updated">الطقس الحالي</div>
       </div>
-      <div class="muted">🇪🇬 مصر</div>
+      <div class="muted">🌍 الطقس حول العالم</div>
     </div>
 
     <div class="weather">
@@ -321,6 +323,7 @@ const $ = id => document.getElementById(id);
 
 // الوضع الليلي والنهاري وحفظ الاختيار
 let theme = "light";
+
 try {
   theme = localStorage.getItem("taqsi-theme") || "light";
 } catch(e) {}
@@ -329,11 +332,14 @@ function setTheme(value) {
   document.body.classList.toggle("dark", value === "dark");
   $("themeButton").textContent =
     value === "dark" ? "☀️ الوضع النهاري" : "🌙 الوضع الليلي";
+
   theme = value;
+
   try {
     localStorage.setItem("taqsi-theme", value);
   } catch(e) {}
 }
+
 setTheme(theme);
 
 $("themeButton").addEventListener("click", () => {
@@ -352,34 +358,54 @@ function weatherInfo(code, isDay = true) {
   return {text:"حالة الطقس", icon:"🌤️"};
 }
 
+// محافظات مصر ومدن مشهورة بإحداثياتها
 const cities = {
-  "القاهرة":[30.0444,31.2357],
-  "الجيزة":[30.0131,31.2089],
-  "الإسكندرية":[31.2001,29.9187],
-  "المنوفية":[30.5972,30.9876],
-  "شبين الكوم":[30.5526,31.009],
-  "طنطا":[30.7865,31.0004],
-  "المنصورة":[31.0409,31.3785],
-  "دمنهور":[31.0341,30.4682],
-  "بنها":[30.4667,31.1833],
-  "الزقازيق":[30.5877,31.502],
-  "الإسماعيلية":[30.5965,32.2715],
-  "بورسعيد":[31.2653,32.3019],
-  "السويس":[29.9668,32.5498],
-  "الفيوم":[29.3084,30.8428],
-  "بني سويف":[29.0661,31.0994],
-  "المنيا":[28.1099,30.7503],
-  "أسيوط":[27.1809,31.1837],
-  "سوهاج":[26.5569,31.6948],
-  "قنا":[26.1551,32.716],
-  "الأقصر":[25.6872,32.6396],
-  "أسوان":[24.0889,32.8998],
-  "الغردقة":[27.2579,33.8116],
-  "شرم الشيخ":[27.9158,34.3299],
-  "مرسى مطروح":[31.3543,27.2373]
+  "القاهرة": [30.0444,31.2357],
+  "الجيزة": [30.0131,31.2089],
+  "الإسكندرية": [31.2001,29.9187],
+  "القليوبية": [30.3292,31.2165],
+  "المنوفية": [30.5972,30.9876],
+  "الغربية": [30.8754,31.0335],
+  "كفر الشيخ": [31.1107,30.9388],
+  "الدقهلية": [31.0409,31.3785],
+  "الشرقية": [30.5877,31.502],
+  "دمياط": [31.4175,31.8144],
+  "البحيرة": [30.8481,30.3436],
+  "الإسماعيلية": [30.5965,32.2715],
+  "بورسعيد": [31.2653,32.3019],
+  "السويس": [29.9668,32.5498],
+  "شمال سيناء": [31.1310,33.7984],
+  "جنوب سيناء": [28.2413,33.6220],
+  "الفيوم": [29.3084,30.8428],
+  "بني سويف": [29.0661,31.0994],
+  "المنيا": [28.1099,30.7503],
+  "أسيوط": [27.1809,31.1837],
+  "الوادي الجديد": [25.4514,30.5464],
+  "سوهاج": [26.5569,31.6948],
+  "قنا": [26.1551,32.7160],
+  "الأقصر": [25.6872,32.6396],
+  "أسوان": [24.0889,32.8998],
+  "البحر الأحمر": [27.2579,33.8116],
+  "مطروح": [31.3543,27.2373],
+
+  "شبين الكوم": [30.5526,31.0090],
+  "طنطا": [30.7865,31.0004],
+  "المنصورة": [31.0409,31.3785],
+  "دمنهور": [31.0341,30.4682],
+  "بنها": [30.4667,31.1833],
+  "الزقازيق": [30.5877,31.5020],
+  "مرسى مطروح": [31.3543,27.2373],
+  "الغردقة": [27.2579,33.8116],
+  "شرم الشيخ": [27.9158,34.3299],
+  "العريش": [31.1310,33.7984],
+  "6 أكتوبر": [29.9285,30.9188],
+  "العاصمة الإدارية": [30.0038,31.7094]
 };
 
-const dayNames = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+const dayNames = [
+  "الأحد","الاثنين","الثلاثاء","الأربعاء",
+  "الخميس","الجمعة","السبت"
+];
 
 function status(message, error = false) {
   $("status").textContent = message;
@@ -398,42 +424,68 @@ async function loadWeather(lat, lon, name) {
 
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error("تعذر الحصول على بيانات الطقس");
+
+    if (!response.ok) {
+      throw new Error("تعذر الحصول على بيانات الطقس");
+    }
 
     const data = await response.json();
     const current = data.current;
     const daily = data.daily;
-    const info = weatherInfo(current.weather_code, current.is_day === 1);
+
+    const info = weatherInfo(
+      current.weather_code,
+      current.is_day === 1
+    );
 
     $("cityName").textContent = name;
-    $("updated").textContent = "آخر تحديث: " + current.time.replace("T"," ");
-    $("temperature").innerHTML = Math.round(current.temperature_2m) + "<small>°C</small>";
+    $("updated").textContent =
+      "آخر تحديث: " + current.time.replace("T"," ");
+
+    $("temperature").innerHTML =
+      Math.round(current.temperature_2m) + "<small>°C</small>";
+
     $("temperature").dataset.icon = info.icon;
     $("description").textContent = info.text;
     $("weatherIcon").textContent = info.icon;
-    $("feels").textContent = "درجة الحرارة المحسوسة: " + Math.round(current.apparent_temperature) + "°";
-    $("humidity").textContent = current.relative_humidity_2m + "%";
-    $("wind").textContent = Math.round(current.wind_speed_10m) + " كم/س";
-    $("maxTemp").textContent = Math.round(daily.temperature_2m_max[0]) + "°";
-    $("minTemp").textContent = Math.round(daily.temperature_2m_min[0]) + "°";
+
+    $("feels").textContent =
+      "درجة الحرارة المحسوسة: " +
+      Math.round(current.apparent_temperature) + "°";
+
+    $("humidity").textContent =
+      current.relative_humidity_2m + "%";
+
+    $("wind").textContent =
+      Math.round(current.wind_speed_10m) + " كم/س";
+
+    $("maxTemp").textContent =
+      Math.round(daily.temperature_2m_max[0]) + "°";
+
+    $("minTemp").textContent =
+      Math.round(daily.temperature_2m_min[0]) + "°";
 
     $("forecast").innerHTML = "";
 
     daily.time.forEach((date, index) => {
       const parts = date.split("-");
+
       const localDate = new Date(
         Number(parts[0]),
         Number(parts[1])-1,
         Number(parts[2])
       );
 
-      const forecastInfo = weatherInfo(daily.weather_code[index]);
+      const forecastInfo =
+        weatherInfo(daily.weather_code[index]);
+
       const day = document.createElement("div");
       day.className = "day";
 
       const nameEl = document.createElement("div");
       nameEl.className = "day-name";
-      nameEl.textContent = index === 0 ? "اليوم" : dayNames[localDate.getDay()];
+      nameEl.textContent =
+        index === 0 ? "اليوم" : dayNames[localDate.getDay()];
 
       const iconEl = document.createElement("div");
       iconEl.className = "day-icon";
@@ -445,45 +497,109 @@ async function loadWeather(lat, lon, name) {
 
       const highEl = document.createElement("div");
       highEl.className = "day-temp";
-      highEl.textContent = Math.round(daily.temperature_2m_max[index]) + "°";
+      highEl.textContent =
+        Math.round(daily.temperature_2m_max[index]) + "°";
 
       const lowEl = document.createElement("div");
       lowEl.className = "day-low";
-      lowEl.textContent = Math.round(daily.temperature_2m_min[index]) + "°";
+      lowEl.textContent =
+        Math.round(daily.temperature_2m_min[index]) + "°";
 
       day.append(nameEl, iconEl, descEl, highEl, lowEl);
       $("forecast").appendChild(day);
     });
 
     status("✅ تم تحديث حالة الطقس بنجاح");
+
   } catch(error) {
-    status("تعذر تحميل الطقس. تأكد من اتصال الإنترنت وحاول مرة أخرى.", true);
+    status(
+      "تعذر تحميل الطقس. تأكد من اتصال الإنترنت وحاول مرة أخرى.",
+      true
+    );
   }
 }
 
-$("searchForm").addEventListener("submit", event => {
+// البحث المحلي أولًا، ثم البحث الجغرافي العالمي
+$("searchForm").addEventListener("submit", async event => {
   event.preventDefault();
 
   const query = $("cityInput").value.trim();
 
-  if (!query) {
-    status("اكتب اسم المدينة أولًا.", true);
+  if (query.length < 2) {
+    status("اكتب اسم مدينة أو محافظة من حرفين على الأقل.", true);
     return;
   }
 
-  const normalized = query.replace(/\s+/g," ");
-  const city = Object.keys(cities).find(
-    key => key === normalized ||
-           key.includes(normalized) ||
-           normalized.includes(key)
+  const normalized = query.replace(/\s+/g," ").toLocaleLowerCase("ar");
+
+  // البحث في المحافظات والمدن الموجودة بالقائمة
+  const localCity = Object.keys(cities).find(key =>
+    key.toLocaleLowerCase("ar") === normalized
   );
 
-  if (!city) {
-    status("المدينة غير موجودة في القائمة. جرّب القاهرة أو شبين الكوم أو الإسكندرية.", true);
+  if (localCity) {
+    loadWeather(
+      cities[localCity][0],
+      cities[localCity][1],
+      localCity + "، مصر"
+    );
     return;
   }
 
-  loadWeather(cities[city][0], cities[city][1], city);
+  // البحث في قاعدة بيانات الأماكن حول العالم
+  status("🔎 جاري البحث عن المدينة...");
+
+  try {
+    const geoUrl =
+      "https://geocoding-api.open-meteo.com/v1/search?name=" +
+      encodeURIComponent(query) +
+      "&count=10&language=ar&format=json";
+
+    const response = await fetch(geoUrl);
+
+    if (!response.ok) {
+      throw new Error("فشل البحث");
+    }
+
+    const result = await response.json();
+
+    if (!result.results || result.results.length === 0) {
+      status(
+        "لم نعثر على المكان. جرّب كتابة الاسم بالإنجليزية أو أضف اسم الدولة.",
+        true
+      );
+      return;
+    }
+
+    const locations = result.results;
+    const normalizedQuery = query.toLocaleLowerCase();
+
+    const exactMatch = locations.find(place =>
+      place.name.toLocaleLowerCase() === normalizedQuery
+    );
+
+    const place = exactMatch || locations[0];
+
+    const locationParts = [
+      place.name,
+      place.admin1,
+      place.country
+    ].filter(Boolean);
+
+    const displayName = [...new Set(locationParts)].join("، ");
+
+    loadWeather(
+      place.latitude,
+      place.longitude,
+      displayName
+    );
+
+  } catch(error) {
+    status(
+      "تعذر البحث. تأكد من الإنترنت وحاول مرة أخرى.",
+      true
+    );
+  }
 });
 
 $("locationButton").addEventListener("click", () => {
@@ -500,13 +616,16 @@ $("locationButton").addEventListener("click", () => {
       position.coords.longitude,
       "موقعك الحالي"
     ),
-    () => status("لم نتمكن من تحديد موقعك. اسمح للمتصفح باستخدام الموقع أو ابحث عن مدينتك.", true),
+    () => status(
+      "لم نتمكن من تحديد موقعك. اسمح للمتصفح باستخدام الموقع أو ابحث عن مدينتك.",
+      true
+    ),
     {enableHighAccuracy:false, timeout:10000}
   );
 });
 
 // المدينة الافتراضية عند فتح الموقع
-loadWeather(30.0444, 31.2357, "القاهرة");
+loadWeather(30.0444, 31.2357, "القاهرة، مصر");
 </script>
 </body>
 </html>
