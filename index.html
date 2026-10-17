@@ -3,590 +3,428 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#102a43">
-<title>طقسي | متابعة الطقس</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طقسي | متابعة حالة الطقس</title>
 
 <style>
-:root{
---bg:#f2f7fb;
---card:#fff;
---ink:#102a43;
---muted:#627d98;
---blue:#1769aa;
---line:#d9e5ef;
---stat:#f5f9fc;
---hero1:#102a43;
---hero2:#1769aa;
---shadow:#102a4310;
+:root {
+  --bg:#eef4ff;
+  --card:#ffffff;
+  --text:#172746;
+  --muted:#71809b;
+  --accent:#3478f6;
+  --border:#dce6f5;
 }
-
-body.dark{
---bg:#101923;
---card:#192633;
---ink:#edf6ff;
---muted:#afc2d5;
---blue:#3599e8;
---line:#304354;
---stat:#223342;
---hero1:#080e16;
---hero2:#172d42;
---shadow:#00000030;
+body.dark {
+  --bg:#081426;
+  --card:#13233b;
+  --text:#edf4ff;
+  --muted:#a4b4ce;
+  --accent:#6198ff;
+  --border:#293c58;
 }
-
-*{box-sizing:border-box}
-
-body{
-margin:0;
-font-family:Tahoma,Arial,sans-serif;
-background:linear-gradient(180deg,var(--hero1) 0,var(--hero2) 290px,var(--bg) 290px);
-color:var(--ink);
-min-height:100vh;
-transition:background .25s,color .25s;
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Tahoma,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  transition:.25s;
 }
-
-.wrap{
-width:min(100% - 24px,760px);
-margin:auto;
-padding:22px 0 36px;
+.container { max-width:900px; margin:auto; padding:18px; }
+.top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  direction:ltr;
 }
-
-header{color:#fff;margin-bottom:22px}
-
-.top{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-flex-wrap:wrap;
+.student { text-align:left; direction:rtl; line-height:1.8; }
+.student strong { display:block; font-size:16px; }
+button,input { font:inherit; }
+button { cursor:pointer; }
+.theme {
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:11px 14px;
+  font-weight:bold;
 }
-
-.brand{font-size:1.7rem;font-weight:850}
-.tag{font-size:.85rem;color:#d9f0ff;margin-top:5px}
-
-.search{
-display:flex;
-gap:8px;
-margin-top:18px;
-background:#fff;
-padding:7px;
-border-radius:16px;
+header { text-align:center; padding:28px 0 16px; }
+.logo { font-size:48px; }
+h1 { margin:5px 0 10px; font-size:36px; }
+.subtitle { color:var(--muted); line-height:1.9; font-size:14px; }
+.search { display:flex; gap:8px; margin:18px 0 10px; }
+input {
+  width:100%;
+  min-width:0;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:var(--card);
+  color:var(--text);
+  outline:none;
 }
-
-.search input{
-min-width:0;
-flex:1;
-border:0;
-outline:0;
-padding:12px 10px;
-font:inherit;
-color:#102a43;
-background:transparent;
+.primary {
+  background:var(--accent);
+  color:white;
+  border:0;
+  border-radius:13px;
+  padding:12px 18px;
+  font-weight:bold;
 }
-
-button{
-border:0;
-border-radius:12px;
-padding:11px 16px;
-background:#1769aa;
-color:#fff;
-font:inherit;
-font-weight:bold;
-cursor:pointer;
+.location {
+  width:100%;
+  margin:0 0 16px;
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:12px;
 }
-
-button:disabled{opacity:.55}
-
-.hint{font-size:.82rem;color:#d9f0ff;margin:10px 5px}
-
-.card{
-background:var(--card);
-border:1px solid var(--line);
-border-radius:22px;
-padding:20px;
-box-shadow:0 10px 30px var(--shadow);
-margin-bottom:15px;
-transition:background .25s,color .25s,border-color .25s;
+.status { text-align:center; color:var(--muted); padding:10px; line-height:1.8; }
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:20px;
+  margin:16px 0;
+  box-shadow:0 10px 30px #00000008;
 }
-
-.location-row{
-display:flex;
-align-items:flex-start;
-justify-content:space-between;
-gap:12px;
+.current-head { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+h2 { margin:0 0 8px; }
+.muted { color:var(--muted); font-size:13px; line-height:1.8; }
+.weather { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:22px 0; }
+.temp {
+  position:relative;
+  isolation:isolate;
+  font-size:clamp(65px,15vw,100px);
+  font-weight:bold;
+  line-height:1.3;
 }
-
-h1{font-size:1.3rem;margin:0 0 5px}
-.muted{color:var(--muted);font-size:.9rem}
-
-.current{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-margin:20px 0;
+.temp::before {
+  content:attr(data-icon);
+  position:absolute;
+  z-index:-1;
+  left:-5px;
+  top:-10px;
+  font-size:90px;
+  opacity:.15;
+  transform:rotate(-12deg);
 }
-
-.temp{
-font-size:4rem;
-line-height:1;
-font-weight:850;
-position:relative;
-isolation:isolate;
+.temp small { font-size:25px; vertical-align:top; }
+.desc { font-size:17px; font-weight:bold; margin-top:8px; }
+.big-icon { font-size:clamp(65px,15vw,100px); }
+.details { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.detail {
+  text-align:center;
+  padding:13px 5px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--bg);
 }
-
-.temp::before{
-content:attr(data-icon);
-position:absolute;
-z-index:-1;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-font-size:5.8rem;
-opacity:.16;
-pointer-events:none;
-filter:saturate(1.3);
-white-space:nowrap;
+.detail-icon { font-size:23px; margin-bottom:8px; }
+.detail-label { color:var(--muted); font-size:12px; margin-bottom:7px; }
+.detail-value { font-weight:bold; font-size:14px; }
+.forecast { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+.day {
+  text-align:center;
+  border:1px solid var(--border);
+  background:var(--bg);
+  border-radius:14px;
+  padding:13px 3px;
 }
-
-.temp.hot::before{opacity:.25}
-.temp.cold::before{opacity:.24}
-
-.weather-icon{font-size:4rem}
-
-.condition{font-weight:bold;font-size:1.08rem;margin-top:8px}
-
-.stats{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-}
-
-.stat{
-background:var(--stat);
-border:1px solid var(--line);
-border-radius:15px;
-padding:13px 10px;
-}
-
-.label{font-size:.82rem;color:var(--muted)}
-.value{font-size:1rem;font-weight:bold;margin-top:6px}
-
-h2{font-size:1.1rem;margin:0 0 15px}
-
-.forecast{
-display:grid;
-grid-template-columns:repeat(5,minmax(0,1fr));
-gap:8px;
-}
-
-.day{
-background:var(--stat);
-border:1px solid var(--line);
-border-radius:15px;
-text-align:center;
-padding:12px 4px;
-}
-
-.day .name{font-size:.78rem;color:var(--muted)}
-.day .ico{font-size:1.6rem;margin:7px 0}
-.day .high{font-weight:bold}
-.day .low{font-size:.82rem;color:var(--muted);margin-top:4px}
-
-.status{
-padding:12px;
-border-radius:13px;
-margin-bottom:14px;
-font-size:.92rem;
-display:none;
-}
-
-.status.show{display:block}
-.status.error{background:#fff0f0;color:#a32121;border:1px solid #ffd1d1}
-.status.info{background:#eaf6ff;color:#15527a;border:1px solid #c8e8ff}
-
-.small-btn{
-background:#e4f3ff;
-color:#15527a;
-padding:8px 10px;
-font-size:.84rem;
-}
-
-body.dark .small-btn{
-background:#30495d;
-color:#edf6ff;
-}
-
-footer{
-text-align:center;
-color:var(--muted);
-font-size:.8rem;
-padding:8px 0;
-line-height:1.9;
-}
-
-@media(max-width:420px){
-.wrap{width:calc(100% - 16px);padding-top:15px}
-.card{padding:15px}
-.temp{font-size:3.2rem}
-.temp::before{font-size:4.8rem}
-.weather-icon{font-size:3.4rem}
-.forecast{gap:5px}
-.day{padding:10px 2px}
-.day .name{font-size:.7rem}
-.day .ico{font-size:1.4rem}
-.stats{gap:6px}
-.stat{padding:10px 6px}
-.label{font-size:.72rem}
-.value{font-size:.88rem}
+.day-name { font-size:12px; color:var(--muted); margin-bottom:12px; }
+.day-icon { font-size:27px; margin-bottom:10px; }
+.day-temp { font-weight:bold; font-size:13px; }
+.day-low { color:var(--muted); font-size:12px; margin-top:7px; }
+footer { text-align:center; color:var(--muted); font-size:13px; line-height:2; padding:20px 0; }
+@media(max-width:560px) {
+  .container { padding:12px; }
+  .card { padding:15px; }
+  .details { grid-template-columns:repeat(2,1fr); }
+  .forecast { gap:4px; }
+  .day { padding:11px 2px; }
+  .day-name { font-size:10px; }
+  .day-icon { font-size:24px; }
+  .day-temp { font-size:11px; }
+  .search { gap:5px; }
+  .search input { padding:12px 8px; font-size:13px; }
+  .primary { padding:12px; font-size:13px; }
 }
 </style>
 </head>
 
 <body>
-<main class="wrap">
+<div class="container">
 
-<header>
-<div class="top">
-<div>
-<div class="brand">☀️ طقسي</div>
-<div class="tag">حالة الطقس بين إيديك</div>
-</div>
+  <div class="top">
+    <div class="student">
+      <span class="muted">طالب المشروع</span>
+      <strong>مصطفى النحاس</strong>
+      <span class="muted">إشراف دكتور رشدي فاروق</span>
+    </div>
+    <button class="theme" id="themeButton" type="button">🌙 الوضع الليلي</button>
+  </div>
 
-<div style="font-size:.85rem;font-weight:bold">
-الطالب: مصطفى النحاس
-</div>
+  <header>
+    <div class="logo">🌤️</div>
+    <h1>طقسي</h1>
+    <div class="subtitle">
+      برنامج متابعة حالة الطقس<br>
+      اعرف حالة الجو ودرجات الحرارة وتوقعات الأيام القادمة
+    </div>
+  </header>
 
-<div style="display:flex;gap:6px">
-<button id="themeBtn" class="small-btn" type="button"
-aria-label="تغيير الوضع">
-🌙 ليلي
-</button>
-<button id="refreshBtn" class="small-btn" type="button">
-تحديث ↻
-</button>
-</div>
-</div>
+  <form class="search" id="searchForm">
+    <input id="cityInput" placeholder="اكتب اسم المدينة، مثال: شبين الكوم" aria-label="اسم المدينة">
+    <button class="primary" type="submit">بحث 🔎</button>
+  </form>
 
-<form id="searchForm" class="search">
-<input id="cityInput" list="egyptCities"
-placeholder="اكتب اسم محافظة مصرية..."
-aria-label="اسم المحافظة" autocomplete="off">
-<datalist id="egyptCities"></datalist>
-<button id="searchBtn" type="submit">بحث</button>
-</form>
+  <button class="location" id="locationButton" type="button">📍 استخدام موقعي الحالي</button>
+  <div class="status" id="status">جاري تحميل الطقس...</div>
 
-<div class="hint">
-بحث مخصص لمحافظات مصر • بيانات الطقس من Open-Meteo
-</div>
-</header>
+  <section class="card">
+    <div class="current-head">
+      <div>
+        <h2 id="cityName">القاهرة</h2>
+        <div class="muted" id="updated">الطقس الحالي</div>
+      </div>
+      <div class="muted">🇪🇬 مصر</div>
+    </div>
 
-<div id="status" class="status info" role="status"></div>
+    <div class="weather">
+      <div>
+        <div class="temp" id="temperature" data-icon="☀️">--<small>°C</small></div>
+        <div class="desc" id="description">جاري التحميل</div>
+        <div class="muted" id="feels">المحسوسة: --°</div>
+      </div>
+      <div class="big-icon" id="weatherIcon">🌤️</div>
+    </div>
 
-<section class="card" aria-live="polite">
-<div class="location-row">
-<div>
-<h1 id="placeName">القاهرة، مصر</h1>
-<div id="updated" class="muted">جارٍ تحميل بيانات الطقس...</div>
-</div>
-<button id="myLocationBtn" class="small-btn" type="button">
-موقعي الحالي
-</button>
-</div>
+    <div class="details">
+      <div class="detail">
+        <div class="detail-icon">💧</div>
+        <div class="detail-label">الرطوبة</div>
+        <div class="detail-value" id="humidity">--%</div>
+      </div>
+      <div class="detail">
+        <div class="detail-icon">💨</div>
+        <div class="detail-label">الرياح</div>
+        <div class="detail-value" id="wind">-- كم/س</div>
+      </div>
+      <div class="detail">
+        <div class="detail-icon">🌡️</div>
+        <div class="detail-label">العظمى اليوم</div>
+        <div class="detail-value" id="maxTemp">--°</div>
+      </div>
+      <div class="detail">
+        <div class="detail-icon">❄️</div>
+        <div class="detail-label">الصغرى اليوم</div>
+        <div class="detail-value" id="minTemp">--°</div>
+      </div>
+    </div>
+  </section>
 
-<div class="current">
-<div>
-<div id="temperatureBox" class="temp" data-icon="🌤️">
-<span id="temperature">--</span><span style="font-size:1.5rem">°C</span>
-</div>
-<div id="condition" class="condition">جارٍ تحميل الطقس</div>
-<div class="muted">المحسوسة <strong id="feelsLike">--°</strong></div>
-</div>
-<div id="weatherIcon" class="weather-icon">🌤️</div>
-</div>
+  <section class="card">
+    <h2>📅 توقعات الطقس لمدة 5 أيام</h2>
+    <div class="forecast" id="forecast">
+      <div class="status">جاري تحميل التوقعات...</div>
+    </div>
+  </section>
 
-<div class="stats">
-<div class="stat">
-<div class="label">💧 الرطوبة</div>
-<div class="value" id="humidity">--%</div>
+  <footer>
+    مشروع برنامج متابعة حالة الطقس<br>
+    إعداد الطالب: مصطفى النحاس<br>
+    إشراف: دكتور رشدي فاروق<br>
+    مصدر البيانات: Open-Meteo
+  </footer>
 </div>
-<div class="stat">
-<div class="label">💨 سرعة الرياح</div>
-<div class="value" id="wind">-- كم/س</div>
-</div>
-<div class="stat">
-<div class="label">🌡️ العظمى / الصغرى</div>
-<div class="value">
-<span id="todayHigh">--</span>° /
-<span id="todayLow">--</span>°
-</div>
-</div>
-</div>
-</section>
-
-<section class="card">
-<h2>توقعات الأيام الخمسة القادمة</h2>
-<div id="forecast" class="forecast">
-<div class="muted">جارٍ تحميل التوقعات...</div>
-</div>
-</section>
-
-<footer>
-طقسي — مشروع متابعة حالة الطقس<br>
-إشراف الدكتور رشدي فاروق<br>
-مصدر البيانات: Open-Meteo
-</footer>
-
-</main>
 
 <script>
-const egyptCities = [
-{name:"القاهرة",lat:30.0444,lon:31.2357},
-{name:"الجيزة",lat:30.0131,lon:31.2089},
-{name:"الإسكندرية",lat:31.2001,lon:29.9187},
-{name:"القليوبية",lat:30.3292,lon:31.2168},
-{name:"المنوفية",lat:30.5972,lon:30.9876},
-{name:"شبين الكوم",lat:30.5526,lon:31.0090},
-{name:"الغربية",lat:30.7865,lon:31.0004},
-{name:"طنطا",lat:30.7865,lon:31.0004},
-{name:"كفر الشيخ",lat:31.1107,lon:30.9388},
-{name:"الدقهلية",lat:31.0364,lon:31.3807},
-{name:"المنصورة",lat:31.0409,lon:31.3785},
-{name:"دمياط",lat:31.4175,lon:31.8144},
-{name:"بورسعيد",lat:31.2653,lon:32.3019},
-{name:"الإسماعيلية",lat:30.5965,lon:32.2715},
-{name:"السويس",lat:29.9668,lon:32.5498},
-{name:"الشرقية",lat:30.5877,lon:31.5020},
-{name:"الزقازيق",lat:30.5877,lon:31.5020},
-{name:"البحيرة",lat:30.8481,lon:30.3436},
-{name:"دمنهور",lat:31.0341,lon:30.4682},
-{name:"الفيوم",lat:29.3084,lon:30.8428},
-{name:"بني سويف",lat:29.0661,lon:31.0994},
-{name:"المنيا",lat:28.1099,lon:30.7503},
-{name:"أسيوط",lat:27.1809,lon:31.1837},
-{name:"سوهاج",lat:26.5591,lon:31.6957},
-{name:"قنا",lat:26.1551,lon:32.7160},
-{name:"الأقصر",lat:25.6872,lon:32.6396},
-{name:"أسوان",lat:24.0889,lon:32.8998},
-{name:"البحر الأحمر",lat:27.2579,lon:33.8116},
-{name:"الغردقة",lat:27.2579,lon:33.8116},
-{name:"الوادي الجديد",lat:25.4390,lon:30.5586},
-{name:"مطروح",lat:31.3543,lon:27.2373},
-{name:"شمال سيناء",lat:30.5972,lon:32.2715},
-{name:"العريش",lat:31.1316,lon:33.7984},
-{name:"جنوب سيناء",lat:28.5560,lon:33.9500},
-{name:"الطور",lat:28.2417,lon:33.6222}
-];
-
 const $ = id => document.getElementById(id);
 
-const normalize = value => String(value || "")
-.trim().toLowerCase()
-.replace(/[أإآ]/g,"ا")
-.replace(/ى/g,"ي")
-.replace(/ة/g,"ه")
-.replace(/[ًٌٍَُِّْـ]/g,"")
-.replace(/\s+/g," ");
+// الوضع الليلي والنهاري وحفظ الاختيار
+let theme = "light";
+try {
+  theme = localStorage.getItem("taqsi-theme") || "light";
+} catch(e) {}
 
-egyptCities.forEach(city => {
-const option = document.createElement("option");
-option.value = city.name;
-$("egyptCities").appendChild(option);
+function setTheme(value) {
+  document.body.classList.toggle("dark", value === "dark");
+  $("themeButton").textContent =
+    value === "dark" ? "☀️ الوضع النهاري" : "🌙 الوضع الليلي";
+  theme = value;
+  try { localStorage.setItem("taqsi-theme", value); } catch(e) {}
+}
+setTheme(theme);
+
+$("themeButton").addEventListener("click", () => {
+  setTheme(theme === "dark" ? "light" : "dark");
 });
 
-/* الوضع الليلي والنهاري مع حفظ الاختيار */
-function applyTheme(theme){
-document.body.classList.toggle("dark",theme==="dark");
-$("themeBtn").textContent=theme==="dark"?"☀️ نهاري":"🌙 ليلي";
-document.querySelector('meta[name="theme-color"]')
-.setAttribute("content",theme==="dark"?"#101923":"#102a43");
+function weatherInfo(code, isDay = true) {
+  if (code === 0) return {text:"سماء صافية", icon:isDay ? "☀️" : "🌙"};
+  if ([1,2].includes(code)) return {text:"غائم جزئيًا", icon:isDay ? "🌤️" : "☁️"};
+  if (code === 3) return {text:"غائم", icon:"☁️"};
+  if ([45,48].includes(code)) return {text:"شبورة أو ضباب", icon:"🌫️"};
+  if ([51,53,55,56,57].includes(code)) return {text:"رذاذ", icon:"🌦️"};
+  if ([61,63,65,66,67,80,81,82].includes(code)) return {text:"أمطار", icon:"🌧️"};
+  if ([71,73,75,77,85,86].includes(code)) return {text:"ثلوج", icon:"❄️"};
+  if ([95,96,99].includes(code)) return {text:"عواصف رعدية", icon:"⛈️"};
+  return {text:"حالة الطقس", icon:"🌤️"};
 }
 
-let savedTheme="light";
-try{
-savedTheme=localStorage.getItem("taqsi-theme")||"light";
-}catch(e){}
-applyTheme(savedTheme);
-
-$("themeBtn").addEventListener("click",()=>{
-const next=document.body.classList.contains("dark")?"light":"dark";
-applyTheme(next);
-try{
-localStorage.setItem("taqsi-theme",next);
-}catch(e){}
-});
-
-let activeCity = egyptCities[0];
-
-function showStatus(message,type="info"){
-const el=$("status");
-el.textContent=message;
-el.className="status show "+type;
-}
-
-function hideStatus(){
-$("status").className="status";
-}
-
-function weatherDescription(code,isDay=1){
-if(code===0)return isDay?[ "صافي","☀️" ]:["صافي","🌙"];
-if([1,2].includes(code))return["غائم جزئيًا",isDay?"🌤️":"☁️"];
-if(code===3)return["غائم","☁️"];
-if([45,48].includes(code))return["شبورة أو ضباب","🌫️"];
-if([51,53,55,56,57].includes(code))return["رذاذ","🌦️"];
-if([61,63,65,66,67,80,81,82].includes(code))return["أمطار","🌧️"];
-if([71,73,75,77,85,86].includes(code))return["ثلوج","🌨️"];
-if([95,96,99].includes(code))return["عواصف رعدية","⛈️"];
-return["حالة جوية متغيرة","🌡️"];
-}
-
-function dayName(dateString,index){
-if(index===0)return"اليوم";
-return new Intl.DateTimeFormat("ar-EG",{
-weekday:"short",timeZone:"UTC"
-}).format(new Date(dateString+"T12:00:00Z"));
-}
-
-async function loadWeather(city){
-$("searchBtn").disabled=true;
-$("refreshBtn").disabled=true;
-showStatus("جارٍ تحميل بيانات الطقس...","info");
-
-try{
-const url="https://api.open-meteo.com/v1/forecast?latitude="+
-encodeURIComponent(city.lat)+
-"&longitude="+encodeURIComponent(city.lon)+
-"&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m"+
-"&daily=weather_code,temperature_2m_max,temperature_2m_min"+
-"&forecast_days=5&timezone=auto";
-
-const response=await fetch(url);
-if(!response.ok)throw new Error("تعذر جلب بيانات الطقس. حاول مرة أخرى.");
-
-const data=await response.json();
-if(!data.current||!data.daily)throw new Error("بيانات الطقس غير مكتملة حاليًا.");
-
-activeCity=city;
-
-$("placeName").textContent=city.name+"، مصر";
-
-$("updated").textContent="آخر تحديث: "+
-new Intl.DateTimeFormat("ar-EG",{
-hour:"2-digit",minute:"2-digit"
-}).format(new Date());
-
-const temperature=Math.round(data.current.temperature_2m);
-$("temperature").textContent=temperature;
-$("feelsLike").textContent=Math.round(data.current.apparent_temperature)+"°";
-$("humidity").textContent=Math.round(data.current.relative_humidity_2m)+"%";
-$("wind").textContent=Math.round(data.current.wind_speed_10m)+" كم/س";
-$("todayHigh").textContent=Math.round(data.daily.temperature_2m_max[0]);
-$("todayLow").textContent=Math.round(data.daily.temperature_2m_min[0]);
-
-const [description,icon]=weatherDescription(
-data.current.weather_code,data.current.is_day
-);
-
-$("condition").textContent=description;
-$("weatherIcon").textContent=icon;
-
-/* أيقونة كبيرة خلف درجة الحرارة */
-const tempBox=$("temperatureBox");
-tempBox.dataset.icon=icon;
-tempBox.classList.toggle("hot",temperature>=35);
-tempBox.classList.toggle("cold",temperature<=10);
-
-$("forecast").innerHTML="";
-
-data.daily.time.forEach((date,index)=>{
-const [desc,dayIcon]=weatherDescription(data.daily.weather_code[index],1);
-
-const item=document.createElement("div");
-item.className="day";
-
-const name=document.createElement("div");
-name.className="name";
-name.textContent=dayName(date,index);
-
-const ico=document.createElement("div");
-ico.className="ico";
-ico.textContent=dayIcon;
-ico.title=desc;
-
-const high=document.createElement("div");
-high.className="high";
-high.textContent=Math.round(data.daily.temperature_2m_max[index])+"°";
-
-const low=document.createElement("div");
-low.className="low";
-low.textContent=Math.round(data.daily.temperature_2m_min[index])+"°";
-
-item.append(name,ico,high,low);
-$("forecast").appendChild(item);
-});
-
-hideStatus();
-
-}catch(error){
-showStatus(
-error.message||"حدث خطأ في الاتصال. تأكد من الإنترنت ثم حاول مجددًا.",
-"error"
-);
-}finally{
-$("searchBtn").disabled=false;
-$("refreshBtn").disabled=false;
-}
-}
-
-$("searchForm").addEventListener("submit",async event=>{
-event.preventDefault();
-
-const query=normalize($("cityInput").value);
-
-if(!query){
-showStatus("اكتب اسم محافظة أو مدينة مصرية أولًا.","error");
-return;
-}
-
-const city=egyptCities.find(item=>normalize(item.name)===query);
-
-if(city){
-await loadWeather(city);
-}else{
-showStatus("الاسم غير موجود في القائمة. جرّب المنوفية أو القاهرة أو سوهاج.","error");
-}
-});
-
-$("refreshBtn").addEventListener("click",()=>loadWeather(activeCity));
-
-$("myLocationBtn").addEventListener("click",()=>{
-if(!navigator.geolocation){
-showStatus("المتصفح لا يدعم تحديد الموقع. ابحث باسم محافظتك.","error");
-return;
-}
-
-showStatus("جارٍ تحديد موقعك...","info");
-
-navigator.geolocation.getCurrentPosition(async position=>{
-const city={
-name:"موقعك الحالي",
-lat:position.coords.latitude,
-lon:position.coords.longitude
+const cities = {
+  "القاهرة":[30.0444,31.2357],
+  "الجيزة":[30.0131,31.2089],
+  "الإسكندرية":[31.2001,29.9187],
+  "المنوفية":[30.5972,30.9876],
+  "شبين الكوم":[30.5526,31.009],
+  "طنطا":[30.7865,31.0004],
+  "المنصورة":[31.0409,31.3785],
+  "دمنهور":[31.0341,30.4682],
+  "بنها":[30.4667,31.1833],
+  "الزقازيق":[30.5877,31.502],
+  "الإسماعيلية":[30.5965,32.2715],
+  "بورسعيد":[31.2653,32.3019],
+  "السويس":[29.9668,32.5498],
+  "الفيوم":[29.3084,30.8428],
+  "بني سويف":[29.0661,31.0994],
+  "المنيا":[28.1099,30.7503],
+  "أسيوط":[27.1809,31.1837],
+  "سوهاج":[26.5569,31.6948],
+  "قنا":[26.1551,32.716],
+  "الأقصر":[25.6872,32.6396],
+  "أسوان":[24.0889,32.8998],
+  "الغردقة":[27.2579,33.8116],
+  "شرم الشيخ":[27.9158,34.3299],
+  "مرسى مطروح":[31.3543,27.2373]
 };
 
-await loadWeather(city);
-$("placeName").textContent="موقعك الحالي";
+const dayNames = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 
-},()=>{
-showStatus(
-"لم نتمكن من تحديد موقعك. اسمح للموقع باستخدام الموقع أو ابحث باسم المحافظة.",
-"error"
-);
-},{enableHighAccuracy:false,timeout:10000});
+function status(message, error = false) {
+  $("status").textContent = message;
+  $("status").style.color = error ? "#e45454" : "";
+}
+
+async function loadWeather(lat, lon, name) {
+  status("⏳ جاري تحميل بيانات الطقس...");
+
+  const url = "https://api.open-meteo.com/v1/forecast"
+    + "?latitude=" + encodeURIComponent(lat)
+    + "&longitude=" + encodeURIComponent(lon)
+    + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m"
+    + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+    + "&timezone=auto&forecast_days=5";
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("تعذر الحصول على بيانات الطقس");
+    const data = await response.json();
+
+    const current = data.current;
+    const daily = data.daily;
+    const info = weatherInfo(current.weather_code, current.is_day === 1);
+
+    $("cityName").textContent = name;
+    $("updated").textContent = "آخر تحديث: " + current.time.replace("T"," ");
+    $("temperature").innerHTML = Math.round(current.temperature_2m) + "<small>°C</small>";
+    $("temperature").dataset.icon = info.icon;
+    $("description").textContent = info.text;
+    $("weatherIcon").textContent = info.icon;
+    $("feels").textContent = "درجة الحرارة المحسوسة: " + Math.round(current.apparent_temperature) + "°";
+    $("humidity").textContent = current.relative_humidity_2m + "%";
+    $("wind").textContent = Math.round(current.wind_speed_10m) + " كم/س";
+    $("maxTemp").textContent = Math.round(daily.temperature_2m_max[0]) + "°";
+    $("minTemp").textContent = Math.round(daily.temperature_2m_min[0]) + "°";
+
+    $("forecast").innerHTML = "";
+
+    daily.time.forEach((date, index) => {
+      const parts = date.split("-");
+      const localDate = new Date(
+        Number(parts[0]), Number(parts[1])-1, Number(parts[2])
+      );
+      const forecastInfo = weatherInfo(daily.weather_code[index]);
+
+      const day = document.createElement("div");
+      day.className = "day";
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "day-name";
+      nameEl.textContent = index === 0 ? "اليوم" : dayNames[localDate.getDay()];
+
+      const iconEl = document.createElement("div");
+      iconEl.className = "day-icon";
+      iconEl.textContent = forecastInfo.icon;
+
+      const descEl = document.createElement("div");
+      descEl.className = "day-name";
+      descEl.textContent = forecastInfo.text;
+
+      const highEl = document.createElement("div");
+      highEl.className = "day-temp";
+      highEl.textContent = Math.round(daily.temperature_2m_max[index]) + "°";
+
+      const lowEl = document.createElement("div");
+      lowEl.className = "day-low";
+      lowEl.textContent = Math.round(daily.temperature_2m_min[index]) + "°";
+
+      day.append(nameEl, iconEl, descEl, highEl, lowEl);
+      $("forecast").appendChild(day);
+    });
+
+    status("✅ تم تحديث حالة الطقس بنجاح");
+  } catch(error) {
+    status("تعذر تحميل الطقس. تأكد من اتصال الإنترنت وحاول مرة أخرى.", true);
+  }
+}
+
+$("searchForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const query = $("cityInput").value.trim();
+  if (!query) {
+    status("اكتب اسم المدينة أولًا.", true);
+    return;
+  }
+
+  const normalized = query.replace(/\s+/g," ");
+  const city = Object.keys(cities).find(
+    key => key === normalized || key.includes(normalized) || normalized.includes(key)
+  );
+
+  if (!city) {
+    status("المدينة غير موجودة في القائمة. جرّب القاهرة أو شبين الكوم أو الإسكندرية.", true);
+    return;
+  }
+
+  loadWeather(cities[city][0], cities[city][1], city);
 });
 
-$("cityInput").value="القاهرة";
-loadWeather(egyptCities[0]);
+$("locationButton").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    status("المتصفح لا يدعم تحديد الموقع.", true);
+    return;
+  }
+
+  status("📍 جاري تحديد موقعك...");
+  navigator.geolocation.getCurrentPosition(
+    position => loadWeather(
+      position.coords.latitude,
+      position.coords.longitude,
+      "موقعك الحالي"
+    ),
+    () => status("لم نتمكن من تحديد موقعك. اسمح للمتصفح باستخدام الموقع أو ابحث عن مدينتك.", true),
+    {enableHighAccuracy:false, timeout:10000}
+  );
+});
+
+// المدينة الافتراضية عند فتح الموقع
+loadWeather(30.0444, 31.2357, "القاهرة");
 </script>
 </body>
 </html>
