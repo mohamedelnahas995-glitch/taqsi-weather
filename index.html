@@ -24,14 +24,27 @@ body.dark {
   --border:#293c58;
 }
 * { box-sizing:border-box; }
+
 body {
   margin:0;
   font-family:Tahoma,Arial,sans-serif;
-  background:var(--bg);
+  background-color:#081426;
+  background-image:
+    linear-gradient(
+      rgba(5,15,32,.68),
+      rgba(5,15,32,.80)
+    ),
+    url("https://image.dongascience.com/Photo/2025/09/e321811cd05031d08a3f785e44438c0c.jpg");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+  background-repeat:no-repeat;
   color:var(--text);
   transition:.25s;
 }
+
 .container { max-width:900px; margin:auto; padding:18px; }
+
 .top {
   display:flex;
   justify-content:space-between;
@@ -40,10 +53,13 @@ body {
   flex-wrap:wrap;
   direction:ltr;
 }
+
 .student { text-align:left; direction:rtl; line-height:1.8; }
 .student strong { display:block; font-size:16px; }
+
 button,input { font:inherit; }
 button { cursor:pointer; }
+
 .theme {
   background:var(--card);
   color:var(--text);
@@ -52,11 +68,19 @@ button { cursor:pointer; }
   padding:11px 14px;
   font-weight:bold;
 }
+
 header { text-align:center; padding:28px 0 16px; }
 .logo { font-size:48px; }
 h1 { margin:5px 0 10px; font-size:36px; }
-.subtitle { color:var(--muted); line-height:1.9; font-size:14px; }
+
+.subtitle {
+  color:var(--muted);
+  line-height:1.9;
+  font-size:14px;
+}
+
 .search { display:flex; gap:8px; margin:18px 0 10px; }
+
 input {
   width:100%;
   min-width:0;
@@ -67,6 +91,7 @@ input {
   color:var(--text);
   outline:none;
 }
+
 .primary {
   background:var(--accent);
   color:white;
@@ -75,6 +100,7 @@ input {
   padding:12px 18px;
   font-weight:bold;
 }
+
 .location {
   width:100%;
   margin:0 0 16px;
@@ -84,19 +110,41 @@ input {
   border-radius:13px;
   padding:12px;
 }
-.status { text-align:center; color:var(--muted); padding:10px; line-height:1.8; }
+
+.status {
+  text-align:center;
+  color:var(--muted);
+  padding:10px;
+  line-height:1.8;
+}
+
 .card {
   background:var(--card);
   border:1px solid var(--border);
   border-radius:22px;
   padding:20px;
   margin:16px 0;
-  box-shadow:0 10px 30px #00000008;
+  box-shadow:0 10px 30px #00000018;
 }
-.current-head { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+
+.current-head {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
 h2 { margin:0 0 8px; }
 .muted { color:var(--muted); font-size:13px; line-height:1.8; }
-.weather { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:22px 0; }
+
+.weather {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin:22px 0;
+}
+
 .temp {
   position:relative;
   isolation:isolate;
@@ -104,6 +152,7 @@ h2 { margin:0 0 8px; }
   font-weight:bold;
   line-height:1.3;
 }
+
 .temp::before {
   content:attr(data-icon);
   position:absolute;
@@ -114,10 +163,17 @@ h2 { margin:0 0 8px; }
   opacity:.15;
   transform:rotate(-12deg);
 }
+
 .temp small { font-size:25px; vertical-align:top; }
 .desc { font-size:17px; font-weight:bold; margin-top:8px; }
 .big-icon { font-size:clamp(65px,15vw,100px); }
-.details { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+
+.details {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
 .detail {
   text-align:center;
   padding:13px 5px;
@@ -125,10 +181,17 @@ h2 { margin:0 0 8px; }
   border-radius:14px;
   background:var(--bg);
 }
+
 .detail-icon { font-size:23px; margin-bottom:8px; }
 .detail-label { color:var(--muted); font-size:12px; margin-bottom:7px; }
 .detail-value { font-weight:bold; font-size:14px; }
-.forecast { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+
+.forecast {
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+}
+
 .day {
   text-align:center;
   border:1px solid var(--border);
@@ -136,11 +199,21 @@ h2 { margin:0 0 8px; }
   border-radius:14px;
   padding:13px 3px;
 }
+
 .day-name { font-size:12px; color:var(--muted); margin-bottom:12px; }
 .day-icon { font-size:27px; margin-bottom:10px; }
 .day-temp { font-weight:bold; font-size:13px; }
 .day-low { color:var(--muted); font-size:12px; margin-top:7px; }
-footer { text-align:center; color:var(--muted); font-size:13px; line-height:2; padding:20px 0; }
+
+footer {
+  text-align:center;
+  color:#edf4ff;
+  font-size:13px;
+  line-height:2;
+  padding:20px 0;
+  text-shadow:0 1px 5px #000;
+}
+
 @media(max-width:560px) {
   .container { padding:12px; }
   .card { padding:15px; }
@@ -257,7 +330,9 @@ function setTheme(value) {
   $("themeButton").textContent =
     value === "dark" ? "☀️ الوضع النهاري" : "🌙 الوضع الليلي";
   theme = value;
-  try { localStorage.setItem("taqsi-theme", value); } catch(e) {}
+  try {
+    localStorage.setItem("taqsi-theme", value);
+  } catch(e) {}
 }
 setTheme(theme);
 
@@ -324,8 +399,8 @@ async function loadWeather(lat, lon, name) {
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error("تعذر الحصول على بيانات الطقس");
-    const data = await response.json();
 
+    const data = await response.json();
     const current = data.current;
     const daily = data.daily;
     const info = weatherInfo(current.weather_code, current.is_day === 1);
@@ -347,10 +422,12 @@ async function loadWeather(lat, lon, name) {
     daily.time.forEach((date, index) => {
       const parts = date.split("-");
       const localDate = new Date(
-        Number(parts[0]), Number(parts[1])-1, Number(parts[2])
+        Number(parts[0]),
+        Number(parts[1])-1,
+        Number(parts[2])
       );
-      const forecastInfo = weatherInfo(daily.weather_code[index]);
 
+      const forecastInfo = weatherInfo(daily.weather_code[index]);
       const day = document.createElement("div");
       day.className = "day";
 
@@ -386,7 +463,9 @@ async function loadWeather(lat, lon, name) {
 
 $("searchForm").addEventListener("submit", event => {
   event.preventDefault();
+
   const query = $("cityInput").value.trim();
+
   if (!query) {
     status("اكتب اسم المدينة أولًا.", true);
     return;
@@ -394,7 +473,9 @@ $("searchForm").addEventListener("submit", event => {
 
   const normalized = query.replace(/\s+/g," ");
   const city = Object.keys(cities).find(
-    key => key === normalized || key.includes(normalized) || normalized.includes(key)
+    key => key === normalized ||
+           key.includes(normalized) ||
+           normalized.includes(key)
   );
 
   if (!city) {
@@ -412,6 +493,7 @@ $("locationButton").addEventListener("click", () => {
   }
 
   status("📍 جاري تحديد موقعك...");
+
   navigator.geolocation.getCurrentPosition(
     position => loadWeather(
       position.coords.latitude,
