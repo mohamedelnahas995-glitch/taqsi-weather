@@ -1,0 +1,13 @@
+
+{
+  "name": "طقسي - متابعة حالة الطقس",
+  "short_name": "طقسي",
+  "description": "تطبيق لمتابعة حالة الطقس والتوقعات الجوية",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/taqsi-weather/",
+  "scope": "/taqsi-weather/",
+  "display": "standalone",
+  "background_color": "#eef4ff",
+  "theme_color": "#3478f6"
+}
