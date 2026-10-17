@@ -628,5 +628,17 @@ $("locationButton").addEventListener("click", () => {
 // المدينة الافتراضية عند فتح الموقع
 loadWeather(30.0444, 31.2357, "القاهرة، مصر");
 </script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(
+      "/taqsi-weather/service-worker.js"
+    ).catch((error) => {
+      console.error("Service Worker Error:", error);
+    });
+  });
+}
+</script>
 </body>
 </html>
