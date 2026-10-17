@@ -4,124 +4,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>طقسي | متابعة حالة الطقس</title>
+<meta name="theme-color" content="#10172b">
+<title>طقسي | حالة الطقس</title>
 <style>
+:root{color-scheme:dark;--panel:#1b2742;--muted:#a9b8d5;--text:#f5f8ff;--accent:#82e5ff}
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#075985,#38bdf8);color:#fff;min-height:100vh;padding:20px}
-main{max-width:700px;margin:auto}
-header{text-align:center;padding:20px 0}
-h1{font-size:38px;margin:10px}
-header p{font-size:18px}
-.search{display:flex;gap:8px;margin:20px 0}
-input,button{border:0;border-radius:12px;padding:15px;font-size:17px}
-input{flex:1;min-width:0}
-button{background:#facc15;color:#172554;font-weight:bold;cursor:pointer}
-.card{background:#ffffff20;border:1px solid #ffffff40;border-radius:22px;padding:22px;margin:15px 0;text-align:center}
-#city{font-size:25px}
-#icon{font-size:65px}
-#temp{font-size:55px;font-weight:bold;margin:8px}
-#desc{font-size:21px}
-.details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.detail{background:#ffffff20;padding:15px 5px;border-radius:14px}
-.detail strong{display:block;font-size:20px;margin-top:8px}
-.forecast{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
-.day{background:#ffffff20;border-radius:12px;padding:12px 3px;font-size:14px}
-.day .emoji{font-size:27px;margin:8px 0}
-small{display:block;margin-top:20px;line-height:1.8}
-@media(max-width:420px){body{padding:12px}.card{padding:15px}.forecast{grid-template-columns:repeat(3,1fr)}.details{gap:6px}.detail{font-size:13px}}
+body{margin:0;font-family:system-ui,Tahoma,Arial,sans-serif;background:radial-gradient(ellipse at top,#263f72 0,#121d36 48%,#0a1020 100%);color:var(--text);min-height:100vh;padding:22px 14px}
+main{max-width:850px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:5px 0 26px}
+.logo{display:flex;align-items:center;gap:10px;font-size:24px;font-weight:800}
+.logo span{display:grid;place-items:center;width:45px;height:45px;border-radius:15px;background:#ffffff16}
+.tag{font-size:12px;color:var(--accent);background:#82e5ff15;padding:9px 12px;border-radius:30px}
+.search{display:flex;gap:9px;margin-bottom:20px}
+input{width:100%;min-width:0;background:#ffffff10;color:white;border:1px solid #ffffff20;border-radius:15px;padding:15px;font-size:16px;outline:none}
+input::placeholder{color:#bdc9dd}
+button{border:0;border-radius:14px;background:linear-gradient(135deg,#82e5ff,#7da8ff);color:#10172b;font-size:16px;font-weight:800;padding:0 22px;cursor:pointer}
+button:active{transform:scale(.98)}
+.hero{position:relative;overflow:hidden;border:1px solid #ffffff20;border-radius:28px;padding:25px;background:linear-gradient(135deg,#426eae,#294a82 55%,#26305f);box-shadow:0 18px 50px #0002}
+.hero:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:#ffffff0b;left:-65px;top:-90px}
+.hero-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.eyebrow{color:#d7e8ff;font-size:14px}
+#city{font-size:25px;font-weight:800;margin-top:5px}
+#date{font-size:13px;color:#d7e8ff;margin-top:6px}
+#icon{font-size:75px;line-height:1.25}
+.temp-line{display:flex;align-items:center;gap:12px;margin-top:8px}
+#temp{font-size:76px;font-weight:800;letter-spacing:-3px;line-height:1.2}
+.unit{font-size:25px;color:#d8efff}
+#desc{font-size:19px;margin-top:8px}
+.range{font-size:14px;color:#d7e8ff;margin-top:12px}
+.section-title{font-size:19px;margin:27px 2px 14px;font-weight:800}
+.details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.detail{background:#ffffff09;border:1px solid #ffffff13;border-radius:19px;padding:17px 12px}
+.detail-icon{font-size:23px}
+.detail-name{color:var(--muted);font-size:13px;margin-top:12px}
+.detail strong{display:block;font-size:20px;margin-top:7px;overflow-wrap:anywhere}
+.forecast{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.day{background:#ffffff09;border:1px solid #ffffff13;border-radius:18px;padding:15px 5px;text-align:center}
+.day-name{font-size:13px;color:#d7e8ff}
+.day-icon{font-size:29px;margin:12px 0}
+.day-desc{font-size:11px;color:var(--muted);min-height:28px}
+.day-max{font-size:18px;font-weight:800;margin-top:8px}
+.day-min{font-size:14px;color:var(--muted);margin-top:4px}
+.status{text-align:center;color:#d6e7ff;font-size:14px;min-height:24px;margin:14px 0}
+footer{text-align:center;color:#8799bb;font-size:12px;margin:28px 0 10px;line-height:1.9}
+.light{background:linear-gradient(135deg,#eaf4ff,#d9e7ff);color:#17233e;--muted:#657694}
+.light .detail,.light .day{background:#ffffffa8;border-color:#ccd9ec}
+.light .hero{background:linear-gradient(135deg,#72b7ed,#6488d8,#7a83ce)}
+.light input{background:#fff;color:#17233e;border-color:#cbd8ec}
+.light input::placeholder{color:#657694}
+.light .section-title{color:#17233e}
+@media(max-width:520px){body{padding:13px 10px}.logo{font-size:21px}.hero{padding:21px 17px;border-radius:23px}#city{font-size:22px}#icon{font-size:62px}#temp{font-size:67px}.details{gap:7px}.detail{padding:13px 8px}.detail strong{font-size:16px}.detail-name{font-size:12px}.forecast{gap:6px}.day{padding:12px 2px}.day-desc{font-size:10px}.day-name{font-size:11px}.day-icon{font-size:25px}}
+@media(max-width:360px){.forecast{grid-template-columns:repeat(3,minmax(0,1fr))}.tag{font-size:10px;padding:8px}}
 </style>
 </head>
 <body>
 <main>
 <header>
-<h1>☀️ طقسي</h1>
-<p>برنامج متابعة حالة الطقس</p>
+<div class="logo"><span>🌤️</span><div>طقسي<div style="font-size:12px;color:var(--muted);font-weight:400">الطقس بين إيديك</div></div></div>
+<button id="theme" type="button" style="padding:11px 13px" onclick="toggleTheme()">☀️ / 🌙</button>
 </header>
 
-<div class="search">
-<input id="cityInput" value="القاهرة" placeholder="اكتب اسم المدينة">
-<button onclick="searchCity()">بحث</button>
-</div>
+<form class="search" id="searchForm">
+<input id="cityInput" value="القاهرة" placeholder="ابحث عن مدينة..." aria-label="اسم المدينة">
+<button type="submit">بحث</button>
+</form>
+<div class="status" id="message" role="status">جاري تحميل بيانات الطقس...</div>
 
-<div id="message" role="status">جاري تحميل الطقس...</div>
-
-<section class="card">
-<div id="city">القاهرة</div>
+<section class="hero">
+<div class="hero-top">
+<div><div class="eyebrow">الطقس الآن في</div><div id="city">القاهرة</div><div id="date">حالة الطقس الحالية</div></div>
 <div id="icon">🌤️</div>
-<div id="temp">--°</div>
-<div id="desc">حالة الطقس</div>
-<p>أعلى درجة: <span id="max">--</span>° | أقل درجة: <span id="min">--</span>°</p>
+</div>
+<div class="temp-line"><div id="temp">--°</div><div class="unit">C</div></div>
+<div id="desc">جاري تحميل حالة الجو</div>
+<div class="range">العظمى <b id="max">--</b>° &nbsp; · &nbsp; الصغرى <b id="min">--</b>°</div>
 </section>
 
+<h2 class="section-title">تفاصيل الطقس</h2>
 <section class="details">
-<div class="detail">💧 الرطوبة<strong id="humidity">--%</strong></div>
-<div class="detail">💨 سرعة الرياح<strong id="wind">--</strong></div>
-<div class="detail">🌡️ الحرارة المحسوسة<strong id="feels">--°</strong></div>
+<div class="detail"><div class="detail-icon">💧</div><div class="detail-name">الرطوبة</div><strong id="humidity">--%</strong></div>
+<div class="detail"><div class="detail-icon">💨</div><div class="detail-name">سرعة الرياح</div><strong id="wind">-- كم/س</strong></div>
+<div class="detail"><div class="detail-icon">🌡️</div><div class="detail-name">المحسوسة</div><strong id="feels">--°</strong></div>
 </section>
 
-<section class="card">
-<h2>📅 توقعات الأيام القادمة</h2>
-<div class="forecast" id="forecast"></div>
-</section>
-
-<small>مصدر البيانات: Open-Meteo. درجات الحرارة بالسيلسيوس. يحتاج الموقع إلى اتصال بالإنترنت.</small>
+<h2 class="section-title">توقعات الأيام القادمة</h2>
+<section class="forecast" id="forecast"></section>
+<footer>طقسي — مشروع متابعة حالة الطقس<br>البيانات مقدمة من Open-Meteo · درجات الحرارة بالسيلسيوس</footer>
 </main>
-
 <script>
-const $ = id => document.getElementById(id);
-
-function weatherText(code){
- if(code===0)return ["سماء صافية","☀️"];
- if(code===1)return ["غائم جزئياً","🌤️"];
- if(code===2)return ["غائم جزئياً","⛅"];
- if(code===3)return ["غائم","☁️"];
- if([45,48].includes(code))return ["شبورة","🌫️"];
- if([51,53,55,56,57].includes(code))return ["رذاذ","🌦️"];
- if([61,63,65,66,67,80,81,82].includes(code))return ["أمطار","🌧️"];
- if([71,73,75,77,85,86].includes(code))return ["ثلوج","❄️"];
- if([95,96,99].includes(code))return ["عواصف رعدية","⛈️"];
- return ["حالة الطقس","🌤️"];
+const $=id=>document.getElementById(id);
+function weatherText(c){
+if(c===0)return ["سماء صافية","☀️"];
+if(c===1)return ["صحو غالباً","🌤️"];
+if(c===2)return ["غائم جزئياً","⛅"];
+if(c===3)return ["غائم","☁️"];
+if([45,48].includes(c))return ["شبورة","🌫️"];
+if([51,53,55,56,57].includes(c))return ["رذاذ","🌦️"];
+if([61,63,65,66,67,80,81,82].includes(c))return ["أمطار","🌧️"];
+if([71,73,75,77,85,86].includes(c))return ["ثلوج","❄️"];
+if([95,96,99].includes(c))return ["عواصف رعدية","⛈️"];
+return ["متغير","🌤️"];
 }
-
+const dayNames=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 async function searchCity(){
- const name=$("cityInput").value.trim();
- if(!name){$("message").textContent="اكتب اسم المدينة أولاً";return}
- $("message").textContent="جاري البحث عن "+name+"...";
- try{
-  const geo=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name)+"&count=1&language=ar&format=json");
-  if(!geo.ok)throw Error("تعذر الاتصال بخدمة البحث");
-  const places=await geo.json();
-  if(!places.results||!places.results.length)throw Error("لم يتم العثور على المدينة. جرّب كتابة اسمها بالإنجليزية.");
-  const place=places.results[0];
-  const url="https://api.open-meteo.com/v1/forecast?latitude="+place.latitude+"&longitude="+place.longitude+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5";
-  const response=await fetch(url);
-  if(!response.ok)throw Error("تعذر تحميل بيانات الطقس");
-  const data=await response.json();
-  $("city").textContent=place.name+(place.country?"، "+place.country:"");
-  $("temp").textContent=Math.round(data.current.temperature_2m)+"°";
-  $("humidity").textContent=data.current.relative_humidity_2m+"%";
-  $("wind").textContent=data.current.wind_speed_10m+" كم/س";
-  $("feels").textContent=Math.round(data.current.apparent_temperature)+"°";
-  $("max").textContent=Math.round(data.daily.temperature_2m_max[0]);
-  $("min").textContent=Math.round(data.daily.temperature_2m_min[0]);
-  const desc=weatherText(data.current.weather_code);
-  $("icon").textContent=desc[1];
-  $("desc").textContent=desc[0];
-  $("forecast").innerHTML="";
-  const days=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
-  data.daily.time.forEach((date,i)=>{
-   const d=new Date(date+"T12:00:00");
-   const w=weatherText(data.daily.weather_code[i]);
-   const el=document.createElement("div");
-   el.className="day";
-   el.innerHTML="<div>"+(i===0?"اليوم":days[d.getDay()])+"</div><div class='emoji'>"+w[1]+"</div><div>"+w[0]+"</div><p>"+Math.round(data.daily.temperature_2m_max[i])+"°</p><div>"+Math.round(data.daily.temperature_2m_min[i])+"°</div>";
-   $("forecast").appendChild(el);
-  });
-  $("message").textContent="تم تحديث بيانات الطقس بنجاح ✅";
- }catch(e){
-  $("message").textContent=e.message||"حدث خطأ. تأكد من اتصال الإنترنت وحاول مرة أخرى.";
- }
+const name=$("cityInput").value.trim();
+if(!name){$("message").textContent="اكتب اسم المدينة أولاً";return}
+$("message").textContent="⏳ جاري تحميل الطقس...";
+try{
+const gr=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name)+"&count=1&language=ar&format=json");
+if(!gr.ok)throw Error("تعذر الاتصال بخدمة البحث");
+const gj=await gr.json();
+if(!gj.results||!gj.results.length)throw Error("لم نعثر على المدينة. جرّب الاسم بالإنجليزية.");
+const p=gj.results[0];
+const url="https://api.open-meteo.com/v1/forecast?latitude="+p.latitude+"&longitude="+p.longitude+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5";
+const r=await fetch(url);
+if(!r.ok)throw Error("تعذر تحميل بيانات الطقس");
+const d=await r.json(),c=d.current,w=weatherText(c.weather_code);
+$("city").textContent=p.name+(p.country?"، "+p.country:"");
+$("date").textContent=new Intl.DateTimeFormat("ar-EG",{dateStyle:"full"}).format(new Date());
+$("temp").textContent=Math.round(c.temperature_2m)+"°";
+$("desc").textContent=w[0];
+$("icon").textContent=c.is_day===0&&c.weather_code===0?"🌙":w[1];
+$("max").textContent=Math.round(d.daily.temperature_2m_max[0]);
+$("min").textContent=Math.round(d.daily.temperature_2m_min[0]);
+$("humidity").textContent=c.relative_humidity_2m+"%";
+$("wind").textContent=Math.round(c.wind_speed_10m)+" كم/س";
+$("feels").textContent=Math.round(c.apparent_temperature)+"°";
+$("forecast").replaceChildren();
+d.daily.time.forEach((date,i)=>{
+const dt=new Date(date+"T12:00:00"),z=weatherText(d.daily.weather_code[i]);
+const el=document.createElement("article");el.className="day";
+const parts=[["div","day-name",i===0?"اليوم":dayNames[dt.getDay()]],["div","day-icon",z[1]],["div","day-desc",z[0]],["div","day-max",Math.round(d.daily.temperature_2m_max[i])+"°"],["div","day-min",Math.round(d.daily.temperature_2m_min[i])+"°"]];
+parts.forEach(a=>{const n=document.createElement(a[0]);n.className=a[1];n.textContent=a[2];el.appendChild(n)});
+$("forecast").appendChild(el);
+});
+$("message").textContent="✓ تم تحديث بيانات الطقس";
+}catch(e){$("message").textContent="⚠️ "+(e.message||"حدث خطأ، تحقق من الإنترنت وحاول مجدداً")}
 }
+$("searchForm").addEventListener("submit",e=>{e.preventDefault();searchCity()});
+function toggleTheme(){document.body.classList.toggle("light")}
 searchCity();
 </script>
 </body>
