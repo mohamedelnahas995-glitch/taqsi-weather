@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#081426">
+<meta name="theme-color" content="#3478f6">
 <link rel="manifest" href="manifest.json">
 <title>الطقس | متابعة حالة الطقس</title>
 
@@ -46,166 +46,9 @@ body {
   background-repeat:no-repeat;
   color:var(--text);
   transition:background-color .25s,color .25s;
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* ===== طبقة السحب المتحركة ===== */
-
-.storm-clouds {
-  position:fixed;
-  inset:-18%;
-  z-index:0;
-  pointer-events:none;
-  overflow:hidden;
-  background:
-    radial-gradient(ellipse at 15% 35%,
-      rgba(125,155,205,.24),transparent 38%),
-    radial-gradient(ellipse at 65% 25%,
-      rgba(95,125,175,.28),transparent 40%),
-    radial-gradient(ellipse at 80% 65%,
-      rgba(125,145,185,.20),transparent 36%),
-    radial-gradient(ellipse at 35% 75%,
-      rgba(55,80,125,.30),transparent 43%);
-  background-size:150% 150%;
-  animation:cloudDrift 30s ease-in-out infinite alternate;
-  will-change:background-position,transform;
-}
-
-.storm-clouds::before,
-.storm-clouds::after {
-  content:"";
-  position:absolute;
-  inset:-10%;
-  border-radius:50%;
-  filter:blur(32px);
-}
-
-.storm-clouds::before {
-  background:
-    radial-gradient(ellipse at 30% 30%,
-      rgba(160,180,215,.22),transparent 34%),
-    radial-gradient(ellipse at 70% 60%,
-      rgba(80,110,165,.25),transparent 42%);
-  animation:cloudLayerOne 22s ease-in-out infinite alternate;
-}
-
-.storm-clouds::after {
-  background:
-    radial-gradient(ellipse at 75% 20%,
-      rgba(120,150,200,.18),transparent 35%),
-    radial-gradient(ellipse at 20% 70%,
-      rgba(80,105,155,.20),transparent 38%);
-  animation:cloudLayerTwo 36s ease-in-out infinite alternate;
-}
-
-@keyframes cloudDrift {
-  0% {
-    transform:translate3d(-3%,0,0) scale(1);
-    background-position:0% 50%;
-  }
-  50% {
-    transform:translate3d(2%,1%,0) scale(1.05);
-    background-position:100% 30%;
-  }
-  100% {
-    transform:translate3d(-1%,-2%,0) scale(1.08);
-    background-position:20% 100%;
-  }
-}
-
-@keyframes cloudLayerOne {
-  from { transform:translate(-5%,2%) scale(1); }
-  to { transform:translate(7%,-3%) scale(1.12); }
-}
-
-@keyframes cloudLayerTwo {
-  from { transform:translate(5%,-2%) scale(1.08); }
-  to { transform:translate(-7%,4%) scale(1); }
-}
-
-/* ===== وميض البرق ===== */
-
-.storm-flash {
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  opacity:0;
-  background:rgba(205,225,255,0);
-}
-
-.storm-flash.flash {
-  animation:stormFlash .65s ease-out;
-}
-
-@keyframes stormFlash {
-  0%,100% {
-    opacity:0;
-    background:rgba(205,225,255,0);
-  }
-  12% {
-    opacity:1;
-    background:rgba(205,225,255,.25);
-  }
-  24% {
-    opacity:.05;
-    background:rgba(205,225,255,0);
-  }
-  38% {
-    opacity:.8;
-    background:rgba(205,225,255,.16);
-  }
-  55% {
-    opacity:0;
-    background:rgba(205,225,255,0);
-  }
-}
-
-/* شكل خط البرق */
-
-.lightning-bolt {
-  position:fixed;
-  top:0;
-  right:18%;
-  width:clamp(70px,15vw,150px);
-  height:clamp(220px,55vh,520px);
-  z-index:0;
-  opacity:0;
-  pointer-events:none;
-  filter:drop-shadow(0 0 5px #c9f1ff)
-         drop-shadow(0 0 18px #55baff);
-}
-
-.lightning-bolt.show {
-  animation:boltFlash .65s ease-out;
-}
-
-.lightning-bolt svg {
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-
-.lightning-bolt path {
-  fill:none;
-  stroke:#e9f8ff;
-  stroke-width:3;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-
-@keyframes boltFlash {
-  0%,100% { opacity:0; }
-  10% { opacity:1; }
-  24% { opacity:.08; }
-  36% { opacity:.95; }
-  55% { opacity:0; }
 }
 
 .container {
-  position:relative;
-  z-index:1;
   max-width:900px;
   margin:auto;
   padding:18px;
@@ -287,7 +130,9 @@ body {
 }
 
 @keyframes goldTravel {
-  to { --gold-angle:360deg; }
+  to {
+    --gold-angle:360deg;
+  }
 }
 
 button,
@@ -338,6 +183,8 @@ h1 {
   gap:8px;
   margin:18px 0 10px;
 }
+
+/* إطار حقل البحث */
 
 .input-frame {
   position:relative;
@@ -585,8 +432,12 @@ footer {
 }
 
 @keyframes neonTravel {
-  to { --neon-angle:360deg; }
+  to {
+    --neon-angle:360deg;
+  }
 }
+
+/* نبضات زر البحث */
 
 @keyframes searchPulse {
   0%,100% {
@@ -598,11 +449,6 @@ footer {
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .storm-clouds,
-  .storm-clouds::before,
-  .storm-clouds::after,
-  .storm-flash.flash,
-  .lightning-bolt.show,
   .theme::before,
   .location::before,
   .card::before,
@@ -610,9 +456,12 @@ footer {
   .day::before,
   .input-frame::before,
   .student span::before,
-  .student strong::before,
+  .student strong::before {
+    animation:none;
+  }
+
   .primary {
-    animation:none !important;
+    animation:none;
   }
 }
 
@@ -685,28 +534,11 @@ footer {
     padding:12px;
     font-size:13px;
   }
-
-  .lightning-bolt {
-    right:10%;
-    height:42vh;
-  }
 }
 </style>
 </head>
 
 <body>
-
-<!-- طبقات الخلفية المتحركة -->
-<div class="storm-clouds" aria-hidden="true"></div>
-<div class="storm-flash" id="stormFlash" aria-hidden="true"></div>
-
-<div class="lightning-bolt" id="lightningBolt" aria-hidden="true">
-  <svg viewBox="0 0 100 300" preserveAspectRatio="none">
-    <path d="M58 0 L35 95 L57 88 L18 185 L43 130 L27 137 L58 0"/>
-    <path d="M35 95 L20 145 L36 137"/>
-  </svg>
-</div>
-
 <div class="container">
 
   <div class="top">
@@ -812,44 +644,6 @@ footer {
 
 <script>
 const $ = id => document.getElementById(id);
-
-/* ===== تشغيل وميض البرق على فترات عشوائية ===== */
-(function startStorm() {
-  const flash = $("stormFlash");
-  const bolt = $("lightningBolt");
-
-  if (!flash || !bolt) return;
-
-  const reducedMotion =
-    window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reducedMotion) return;
-
-  function strike() {
-    flash.classList.remove("flash");
-    bolt.classList.remove("show");
-
-    // إعادة تشغيل حركة الوميض
-    void flash.offsetWidth;
-    void bolt.offsetWidth;
-
-    flash.classList.add("flash");
-    bolt.classList.add("show");
-
-    setTimeout(() => {
-      flash.classList.remove("flash");
-      bolt.classList.remove("show");
-    }, 750);
-
-    // البرق يظهر كل فترة مختلفة
-    const nextStrike = 4500 + Math.random() * 8500;
-    setTimeout(strike, nextStrike);
-  }
-
-  // انتظار قصير قبل أول وميض
-  setTimeout(strike, 2500);
-})();
 
 // الوضع الليلي والنهاري وحفظ الاختيار
 let theme = "light";
