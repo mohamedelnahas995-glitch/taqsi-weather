@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head> <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#3478f6">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#3478f6">
+<link rel="manifest" href="manifest.json">
 <title>طقسي | متابعة حالة الطقس</title>
 
 <style>
@@ -15,6 +16,8 @@
   --muted:#71809b;
   --accent:#3478f6;
   --border:#dce6f5;
+  --neon:#35e8ff;
+  --neon2:#4778ff;
 }
 body.dark {
   --bg:#081426;
@@ -31,17 +34,14 @@ body {
   font-family:Tahoma,Arial,sans-serif;
   background-color:#081426;
   background-image:
-    linear-gradient(
-      rgba(5,15,32,.68),
-      rgba(5,15,32,.80)
-    ),
+    linear-gradient(rgba(5,15,32,.68),rgba(5,15,32,.80)),
     url("https://image.dongascience.com/Photo/2025/09/e321811cd05031d08a3f785e44438c0c.jpg");
   background-size:cover;
   background-position:center;
   background-attachment:fixed;
   background-repeat:no-repeat;
   color:var(--text);
-  transition:.25s;
+  transition:background-color .25s,color .25s;
 }
 
 .container { max-width:900px; margin:auto; padding:18px; }
@@ -62,6 +62,8 @@ button,input { font:inherit; }
 button { cursor:pointer; }
 
 .theme {
+  position:relative;
+  isolation:isolate;
   background:var(--card);
   color:var(--text);
   border:1px solid var(--border);
@@ -82,12 +84,24 @@ h1 { margin:5px 0 10px; font-size:36px; }
 
 .search { display:flex; gap:8px; margin:18px 0 10px; }
 
-input {
+/* إطار حقل البحث */
+.input-frame {
+  position:relative;
+  isolation:isolate;
+  flex:1;
+  min-width:0;
+  border-radius:13px;
+  padding:2px;
+  background:var(--card);
+}
+
+.input-frame input {
+  display:block;
   width:100%;
   min-width:0;
-  padding:14px;
-  border:1px solid var(--border);
-  border-radius:13px;
+  padding:12px;
+  border:0;
+  border-radius:11px;
   background:var(--card);
   color:var(--text);
   outline:none;
@@ -100,9 +114,16 @@ input {
   border-radius:13px;
   padding:12px 18px;
   font-weight:bold;
+  animation:searchPulse 1.8s ease-in-out infinite;
+  box-shadow:0 0 8px #3478f680;
+  transition:transform .2s;
 }
 
+.primary:active { transform:scale(.96); }
+
 .location {
+  position:relative;
+  isolation:isolate;
   width:100%;
   margin:0 0 16px;
   background:var(--card);
@@ -120,6 +141,8 @@ input {
 }
 
 .card {
+  position:relative;
+  isolation:isolate;
   background:var(--card);
   border:1px solid var(--border);
   border-radius:22px;
@@ -176,6 +199,8 @@ h2 { margin:0 0 8px; }
 }
 
 .detail {
+  position:relative;
+  isolation:isolate;
   text-align:center;
   padding:13px 5px;
   border:1px solid var(--border);
@@ -194,6 +219,8 @@ h2 { margin:0 0 8px; }
 }
 
 .day {
+  position:relative;
+  isolation:isolate;
   text-align:center;
   border:1px solid var(--border);
   background:var(--bg);
@@ -215,6 +242,70 @@ footer {
   text-shadow:0 1px 5px #000;
 }
 
+/* ===== إطار النيون المتحرك حول كل مربع ===== */
+@property --neon-angle {
+  syntax:"<angle>";
+  initial-value:0deg;
+  inherits:false;
+}
+
+.theme::before,
+.location::before,
+.card::before,
+.detail::before,
+.day::before,
+.input-frame::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  padding:2px;
+  border-radius:inherit;
+  background:conic-gradient(
+    from var(--neon-angle),
+    transparent 0deg,
+    transparent 250deg,
+    var(--neon2) 285deg,
+    var(--neon) 315deg,
+    #ffffff 325deg,
+    var(--neon) 338deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  pointer-events:none;
+  z-index:5;
+  animation:neonTravel 3s linear infinite;
+}
+
+@keyframes neonTravel {
+  to { --neon-angle:360deg; }
+}
+
+/* نبضات زر البحث فقط */
+@keyframes searchPulse {
+  0%,100% {
+    box-shadow:0 0 6px #3478f680,0 0 12px #3478f640;
+  }
+  50% {
+    box-shadow:0 0 12px #35e8ff,0 0 25px #3478f6,0 0 38px #3478f680;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .theme::before,
+  .location::before,
+  .card::before,
+  .detail::before,
+  .day::before,
+  .input-frame::before {
+    animation:none;
+  }
+  .primary { animation:none; }
+}
+
 @media(max-width:560px) {
   .container { padding:12px; }
   .card { padding:15px; }
@@ -225,7 +316,7 @@ footer {
   .day-icon { font-size:24px; }
   .day-temp { font-size:11px; }
   .search { gap:5px; }
-  .search input { padding:12px 8px; font-size:13px; }
+  .input-frame input { padding:12px 8px; font-size:13px; }
   .primary { padding:12px; font-size:13px; }
 }
 </style>
@@ -253,9 +344,11 @@ footer {
   </header>
 
   <form class="search" id="searchForm">
-    <input id="cityInput"
-      placeholder="اكتب اسم المدينة أو المحافظة أو الدولة"
-      aria-label="اسم المدينة">
+    <div class="input-frame">
+      <input id="cityInput"
+        placeholder="اكتب اسم المدينة أو المحافظة أو الدولة"
+        aria-label="اسم المدينة">
+    </div>
     <button class="primary" type="submit">بحث 🔎</button>
   </form>
 
@@ -361,46 +454,45 @@ function weatherInfo(code, isDay = true) {
 
 // محافظات مصر ومدن مشهورة بإحداثياتها
 const cities = {
-  "القاهرة": [30.0444,31.2357],
-  "الجيزة": [30.0131,31.2089],
-  "الإسكندرية": [31.2001,29.9187],
-  "القليوبية": [30.3292,31.2165],
-  "المنوفية": [30.5972,30.9876],
-  "الغربية": [30.8754,31.0335],
-  "كفر الشيخ": [31.1107,30.9388],
-  "الدقهلية": [31.0409,31.3785],
-  "الشرقية": [30.5877,31.502],
-  "دمياط": [31.4175,31.8144],
-  "البحيرة": [30.8481,30.3436],
-  "الإسماعيلية": [30.5965,32.2715],
-  "بورسعيد": [31.2653,32.3019],
-  "السويس": [29.9668,32.5498],
-  "شمال سيناء": [31.1310,33.7984],
-  "جنوب سيناء": [28.2413,33.6220],
-  "الفيوم": [29.3084,30.8428],
-  "بني سويف": [29.0661,31.0994],
-  "المنيا": [28.1099,30.7503],
-  "أسيوط": [27.1809,31.1837],
-  "الوادي الجديد": [25.4514,30.5464],
-  "سوهاج": [26.5569,31.6948],
-  "قنا": [26.1551,32.7160],
-  "الأقصر": [25.6872,32.6396],
-  "أسوان": [24.0889,32.8998],
-  "البحر الأحمر": [27.2579,33.8116],
-  "مطروح": [31.3543,27.2373],
-
-  "شبين الكوم": [30.5526,31.0090],
-  "طنطا": [30.7865,31.0004],
-  "المنصورة": [31.0409,31.3785],
-  "دمنهور": [31.0341,30.4682],
-  "بنها": [30.4667,31.1833],
-  "الزقازيق": [30.5877,31.5020],
-  "مرسى مطروح": [31.3543,27.2373],
-  "الغردقة": [27.2579,33.8116],
-  "شرم الشيخ": [27.9158,34.3299],
-  "العريش": [31.1310,33.7984],
-  "6 أكتوبر": [29.9285,30.9188],
-  "العاصمة الإدارية": [30.0038,31.7094]
+  "القاهرة":[30.0444,31.2357],
+  "الجيزة":[30.0131,31.2089],
+  "الإسكندرية":[31.2001,29.9187],
+  "القليوبية":[30.3292,31.2165],
+  "المنوفية":[30.5972,30.9876],
+  "الغربية":[30.8754,31.0335],
+  "كفر الشيخ":[31.1107,30.9388],
+  "الدقهلية":[31.0409,31.3785],
+  "الشرقية":[30.5877,31.502],
+  "دمياط":[31.4175,31.8144],
+  "البحيرة":[30.8481,30.3436],
+  "الإسماعيلية":[30.5965,32.2715],
+  "بورسعيد":[31.2653,32.3019],
+  "السويس":[29.9668,32.5498],
+  "شمال سيناء":[31.1310,33.7984],
+  "جنوب سيناء":[28.2413,33.6220],
+  "الفيوم":[29.3084,30.8428],
+  "بني سويف":[29.0661,31.0994],
+  "المنيا":[28.1099,30.7503],
+  "أسيوط":[27.1809,31.1837],
+  "الوادي الجديد":[25.4514,30.5464],
+  "سوهاج":[26.5569,31.6948],
+  "قنا":[26.1551,32.7160],
+  "الأقصر":[25.6872,32.6396],
+  "أسوان":[24.0889,32.8998],
+  "البحر الأحمر":[27.2579,33.8116],
+  "مطروح":[31.3543,27.2373],
+  "شبين الكوم":[30.5526,31.0090],
+  "طنطا":[30.7865,31.0004],
+  "المنصورة":[31.0409,31.3785],
+  "دمنهور":[31.0341,30.4682],
+  "بنها":[30.4667,31.1833],
+  "الزقازيق":[30.5877,31.5020],
+  "مرسى مطروح":[31.3543,27.2373],
+  "الغردقة":[27.2579,33.8116],
+  "شرم الشيخ":[27.9158,34.3299],
+  "العريش":[31.1310,33.7984],
+  "6 أكتوبر":[29.9285,30.9188],
+  "العاصمة الإدارية":[30.0038,31.7094]
 };
 
 const dayNames = [
@@ -533,7 +625,6 @@ $("searchForm").addEventListener("submit", async event => {
 
   const normalized = query.replace(/\s+/g," ").toLocaleLowerCase("ar");
 
-  // البحث في المحافظات والمدن الموجودة بالقائمة
   const localCity = Object.keys(cities).find(key =>
     key.toLocaleLowerCase("ar") === normalized
   );
@@ -547,7 +638,6 @@ $("searchForm").addEventListener("submit", async event => {
     return;
   }
 
-  // البحث في قاعدة بيانات الأماكن حول العالم
   status("🔎 جاري البحث عن المدينة...");
 
   try {
