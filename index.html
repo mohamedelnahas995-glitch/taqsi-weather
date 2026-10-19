@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#081426">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <title>طقسي | متابعة حالة الطقس</title>
 
 <style>
@@ -49,8 +50,6 @@ body {
     radial-gradient(2px 2px at 73% 82%,#d9eaff 98%,transparent),
     radial-gradient(2px 2px at 94% 76%,#fff 98%,transparent),
     radial-gradient(ellipse at 50% 100%,#183552 0%,#0b1b31 48%,#050d1b 100%);
-  background-size:auto;
-  background-position:center;
   background-attachment:fixed;
   background-repeat:no-repeat;
   transition:background-color .25s,color .25s;
@@ -141,7 +140,52 @@ footer {
   padding:20px 0;text-shadow:0 1px 5px #000
 }
 
-/* إطارات النيون المتحركة */
+/* خريطة العالم */
+.map-card {overflow:hidden}
+.map-description {
+  color:var(--muted);font-size:13px;line-height:2;margin:8px 0 14px
+}
+.map-search {display:flex;gap:8px;margin-bottom:10px}
+.map-search input {
+  flex:1;min-width:0;width:100%;padding:12px;
+  border:1px solid var(--border);border-radius:12px;
+  background:var(--bg);color:var(--text);outline:none
+}
+.map-search button,.map-button {
+  padding:12px;border:0;border-radius:12px;
+  background:var(--accent);color:white;font-weight:bold
+}
+.map-search button {white-space:nowrap}
+#mapResults {
+  display:grid;gap:8px;margin-bottom:12px
+}
+.map-result {
+  display:block;width:100%;text-align:right;padding:12px;
+  border:1px solid var(--border);border-radius:12px;
+  background:var(--bg);color:var(--text);line-height:1.8
+}
+.map-result:active {transform:scale(.99)}
+.map-result small {display:block;color:var(--muted);font-size:12px}
+#weatherMap {
+  width:100%;height:390px;border-radius:15px;
+  border:1px solid var(--border);z-index:1;background:#dbeafe
+}
+.map-actions {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.map-button {width:100%;min-width:0}
+.map-button.secondary {
+  background:var(--bg);color:var(--text);border:1px solid var(--border)
+}
+.map-message {font-size:13px;color:var(--muted);line-height:1.8;margin:10px 0}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip {
+  background:var(--card);color:var(--text)
+}
+.leaflet-container {font-family:Tahoma,Arial,sans-serif}
+.map-pin-button {
+  padding:8px 10px;border:0;border-radius:8px;
+  background:#3478f6;color:#fff;font-weight:bold;margin-top:6px
+}
+
+/* إطارات النيون */
 @property --neon-angle {
   syntax:"<angle>";initial-value:0deg;inherits:false
 }
@@ -193,6 +237,11 @@ footer {
   .search {gap:5px}
   .input-frame input {padding:12px 8px;font-size:13px}
   .primary {padding:12px;font-size:13px}
+  #weatherMap {height:330px}
+  .map-search {gap:5px}
+  .map-search input {font-size:13px;padding:11px 8px}
+  .map-search button {font-size:12px;padding:10px 8px}
+  .map-actions {grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -205,12 +254,12 @@ footer {
       <strong>مصطفى ماهر عبدالمنعم النحاس</strong>
       <span>إشراف الدكتور رشدي فاروق</span>
     </div>
-    <button class="theme" id="themeButton" type="button">🌒 الوضع الليلي</button>
+    <button class="theme" id="themeButton" type="button">🌙 الوضع الليلي</button>
   </div>
 
   <header>
     <div class="logo">🌤️</div>
-    <h1>الطقس</h1>
+    <h1>طقسي</h1>
     <div class="subtitle">
       برنامج متابعة حالة الطقس<br>
       اعرف حالة الجو ودرجات الحرارة وتوقعات الأيام القادمة
@@ -256,6 +305,41 @@ footer {
     <div class="forecast" id="forecast"><div class="status">جاري تحميل التوقعات...</div></div>
   </section>
 
+  <!-- خريطة العالم والبحث الجغرافي -->
+  <section class="card map-card">
+    <h2>🗺️ خريطة العالم التفاعلية</h2>
+    <div class="map-description">
+      ابحث عن دولة أو محافظة أو مدينة أو منطقة حول العالم.
+      اختر نتيجة البحث لعرضها على الخريطة ومعرفة حالة الطقس فيها.
+      يمكنك أيضًا الضغط على أي مكان على الخريطة.
+    </div>
+
+    <form class="map-search" id="mapSearchForm">
+      <input id="mapSearchInput"
+        placeholder="مثال: باريس، السعودية، شبين الكوم..."
+        aria-label="ابحث عن دولة أو مدينة أو محافظة">
+      <button type="submit">بحث 🌍</button>
+    </form>
+
+    <div id="mapMessage" class="map-message">
+      الخريطة جاهزة. ابحث عن أي مكان أو اضغط على الخريطة.
+    </div>
+    <div id="mapResults"></div>
+    <div id="weatherMap" aria-label="خريطة تفاعلية للعالم"></div>
+
+    <div class="map-actions">
+      <button class="map-button" id="mapEgyptButton" type="button">
+        🇪🇬 عرض مصر
+      </button>
+      <button class="map-button secondary" id="mapWorldButton" type="button">
+        🌍 عرض العالم
+      </button>
+    </div>
+    <div class="muted" style="margin-top:10px">
+      الخرائط © OpenStreetMap · البحث الجغرافي: OpenStreetMap Nominatim
+    </div>
+  </section>
+
   <footer>
     مشروع برنامج متابعة حالة الطقس<br>
     رقم المشروع: 166<br>
@@ -264,6 +348,8 @@ footer {
     مصدر البيانات: Open-Meteo
   </footer>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -275,7 +361,8 @@ try {
 
 function setTheme(value) {
   document.body.classList.toggle("dark", value === "dark");
-  $("themeButton").textContent = value === "dark" ? "☀️ الوضع النهاري" : "🌙 الوضع الليلي";
+  $("themeButton").textContent =
+    value === "dark" ? "☀️ الوضع النهاري" : "🌙 الوضع الليلي";
   theme = value;
   try { localStorage.setItem("taqsi-theme", value); } catch(e) {}
 }
@@ -406,29 +493,34 @@ async function loadWeather(lat, lon, name) {
       day.append(nameEl,iconEl,descEl,highEl,lowEl);
       $("forecast").appendChild(day);
     });
+
     status("✅ تم تحديث حالة الطقس بنجاح");
   } catch(error) {
-    status("تعذر تحميل الطقس. تأكد من اتصال الإنترنت وحاول مرة أخرى.",true);
+    status("تعذر تحميل الطقس. تأكد من الإنترنت وحاول مرة أخرى.",true);
   }
 }
 
-$("searchForm").addEventListener("submit",async event => {
+/* البحث الرئيسي عن المدن */
+$("searchForm").addEventListener("submit", async event => {
   event.preventDefault();
   const query = $("cityInput").value.trim();
+
   if (query.length < 2) {
-    status("اكتب اسم مدينة أو محافظة من حرفين على الأقل.",true);
+    status("اكتب اسم مدينة أو دولة من حرفين على الأقل.",true);
     return;
   }
 
   const normalized = query.replace(/\s+/g," ").toLocaleLowerCase("ar");
-  const localCity = Object.keys(cities).find(key => key.toLocaleLowerCase("ar") === normalized);
+  const localCity = Object.keys(cities).find(
+    key => key.toLocaleLowerCase("ar") === normalized
+  );
 
   if (localCity) {
     loadWeather(cities[localCity][0],cities[localCity][1],localCity + "، مصر");
     return;
   }
 
-  status("🔎 جاري البحث عن المدينة...");
+  status("🔎 جاري البحث عن المكان...");
   try {
     const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name="
       + encodeURIComponent(query) + "&count=10&language=ar&format=json";
@@ -437,16 +529,18 @@ $("searchForm").addEventListener("submit",async event => {
     const result = await response.json();
 
     if (!result.results || result.results.length === 0) {
-      status("لم نعثر على المكان. جرّب كتابة الاسم بالإنجليزية أو أضف اسم الدولة.",true);
+      status("لم نعثر على المكان. جرّب كتابة الاسم بالإنجليزية.",true);
       return;
     }
 
     const locations = result.results;
-    const normalizedQuery = query.toLocaleLowerCase();
-    const exactMatch = locations.find(place => place.name.toLocaleLowerCase() === normalizedQuery);
+    const exactMatch = locations.find(
+      place => place.name.toLocaleLowerCase() === query.toLocaleLowerCase()
+    );
     const place = exactMatch || locations[0];
     const locationParts = [place.name,place.admin1,place.country].filter(Boolean);
     const displayName = [...new Set(locationParts)].join("، ");
+
     loadWeather(place.latitude,place.longitude,displayName);
   } catch(error) {
     status("تعذر البحث. تأكد من الإنترنت وحاول مرة أخرى.",true);
@@ -458,13 +552,188 @@ $("locationButton").addEventListener("click",() => {
     status("المتصفح لا يدعم تحديد الموقع.",true);
     return;
   }
+
   status("📍 جاري تحديد موقعك...");
   navigator.geolocation.getCurrentPosition(
-    position => loadWeather(position.coords.latitude,position.coords.longitude,"موقعك الحالي"),
-    () => status("لم نتمكن من تحديد موقعك. اسمح للمتصفح باستخدام الموقع أو ابحث عن مدينتك.",true),
+    position => loadWeather(
+      position.coords.latitude,
+      position.coords.longitude,
+      "موقعك الحالي"
+    ),
+    () => status("لم نتمكن من تحديد موقعك. اسمح للمتصفح باستخدام الموقع.",true),
     {enableHighAccuracy:false,timeout:10000}
   );
 });
+
+/* إنشاء خريطة العالم */
+const mapMessage = $("mapMessage");
+const mapResults = $("mapResults");
+
+const worldMap = L.map("weatherMap").setView([26.8,30.8],5);
+
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom:19,
+  attribution:'&copy; OpenStreetMap contributors'
+}).addTo(worldMap);
+
+const mapMarkers = L.layerGroup().addTo(worldMap);
+let searchMarker = null;
+let selectedLat = 30.0444;
+let selectedLon = 31.2357;
+let selectedName = "القاهرة، مصر";
+
+function setMapMessage(message, error = false) {
+  mapMessage.textContent = message;
+  mapMessage.style.color = error ? "#e45454" : "";
+}
+
+function makeWeatherPopup(lat, lon, name) {
+  const wrapper = document.createElement("div");
+  wrapper.dir = "rtl";
+  wrapper.style.textAlign = "center";
+
+  const title = document.createElement("strong");
+  title.textContent = name;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "map-pin-button";
+  button.textContent = "عرض الطقس في هذا المكان 🌤️";
+
+  button.addEventListener("click", () => {
+    selectedLat = lat;
+    selectedLon = lon;
+    selectedName = name;
+    loadWeather(lat,lon,name);
+  });
+
+  wrapper.append(title,document.createElement("br"),button);
+  return wrapper;
+}
+
+/* علامات المدن المصرية */
+Object.entries(cities).forEach(([name,coords]) => {
+  const marker = L.marker(coords).addTo(mapMarkers);
+  marker.bindPopup(() => makeWeatherPopup(coords[0],coords[1],name + "، مصر"));
+});
+
+/* الضغط على أي نقطة في العالم */
+worldMap.on("click", event => {
+  const lat = event.latlng.lat;
+  const lon = event.latlng.lng;
+
+  selectedLat = lat;
+  selectedLon = lon;
+  selectedName = "الموقع المحدد على الخريطة";
+
+  if (searchMarker) worldMap.removeLayer(searchMarker);
+
+  searchMarker = L.marker([lat,lon]).addTo(worldMap);
+  searchMarker.bindPopup(
+    makeWeatherPopup(lat,lon,"الموقع المحدد على الخريطة")
+  ).openPopup();
+
+  setMapMessage("تم تحديد الموقع. افتح العلامة واضغط عرض الطقس.");
+});
+
+/* البحث العالمي عن دولة أو محافظة أو مدينة أو منطقة */
+$("mapSearchForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const query = $("mapSearchInput").value.trim();
+
+  if (query.length < 2) {
+    setMapMessage("اكتب اسم مكان من حرفين على الأقل.",true);
+    return;
+  }
+
+  setMapMessage("🔎 جاري البحث عن الأماكن حول العالم...");
+  mapResults.replaceChildren();
+
+  try {
+    const url = "https://nominatim.openstreetmap.org/search?"
+      + new URLSearchParams({
+          q:query,
+          format:"jsonv2",
+          addressdetails:"1",
+          limit:"6",
+          "accept-language":"ar,en"
+        });
+
+    const response = await fetch(url, {
+      headers: { "Accept":"application/json" }
+    });
+
+    if (!response.ok) {
+      throw new Error("خدمة البحث غير متاحة حاليًا");
+    }
+
+    const results = await response.json();
+
+    if (!results.length) {
+      setMapMessage("لم نجد المكان. جرّب الاسم باللغة الإنجليزية أو أضف اسم الدولة.",true);
+      return;
+    }
+
+    setMapMessage("اختر المكان الصحيح من النتائج التالية:");
+
+    results.forEach(place => {
+      const lat = Number(place.lat);
+      const lon = Number(place.lon);
+      const name = place.display_name || query;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "map-result";
+
+      const title = document.createElement("strong");
+      title.textContent = name.split(",")[0];
+
+      const details = document.createElement("small");
+      details.textContent = name;
+
+      button.append(title,details);
+
+      button.addEventListener("click", () => {
+        selectedLat = lat;
+        selectedLon = lon;
+        selectedName = name;
+
+        worldMap.setView([lat,lon],Math.max(worldMap.getZoom(),10));
+
+        if (searchMarker) worldMap.removeLayer(searchMarker);
+
+        searchMarker = L.marker([lat,lon]).addTo(worldMap);
+        searchMarker.bindPopup(
+          makeWeatherPopup(lat,lon,name)
+        ).openPopup();
+
+        setMapMessage("تم تحديد المكان على الخريطة. اضغط على العلامة لعرض الطقس.");
+      });
+
+      mapResults.appendChild(button);
+    });
+  } catch(error) {
+    setMapMessage(
+      "تعذر البحث الآن. تأكد من الإنترنت وحاول مرة أخرى بعد قليل.",
+      true
+    );
+  }
+});
+
+/* أزرار عرض مصر والعالم */
+$("mapEgyptButton").addEventListener("click", () => {
+  worldMap.setView([26.8,30.8],5.5);
+  setMapMessage("خريطة مصر. يمكنك اختيار أي مدينة أو البحث عن مكان.");
+});
+
+$("mapWorldButton").addEventListener("click", () => {
+  worldMap.setView([20,0],2);
+  setMapMessage("خريطة العالم. ابحث عن أي دولة أو مدينة.");
+});
+
+/* إعادة ضبط حجم الخريطة بعد ظهورها */
+setTimeout(() => worldMap.invalidateSize(),500);
 
 loadWeather(30.0444,31.2357,"القاهرة، مصر");
 </script>
@@ -478,4 +747,4 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 </body>
-  </html>
+</html>
