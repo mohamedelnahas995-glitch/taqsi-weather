@@ -33,52 +33,7 @@ button:focus-visible,input:focus-visible{
  outline:2px solid var(--blue);outline-offset:3px
 }
 
-/* ===== خلفية السماء والقمر والنجوم البارزة ===== */
-.sky-night-bg{
- position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
- opacity:1;transition:opacity .6s ease;
-}
-
-.sky-stars{
- position:absolute;inset:0;
- background-image: 
-  radial-gradient(2.5px 2.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-  radial-gradient(3px 3px at 50px 100px, #fffae0, rgba(0,0,0,0)),
-  radial-gradient(2px 2px at 120px 40px, #ffffff, rgba(0,0,0,0)),
-  radial-gradient(3.5px 3.5px at 200px 150px, #fff8cb, rgba(0,0,0,0)),
-  radial-gradient(2px 2px at 280px 70px, #ffffff, rgba(0,0,0,0)),
-  radial-gradient(3px 3px at 340px 190px, #ffffff, rgba(0,0,0,0)),
-  radial-gradient(2.5px 2.5px at 420px 90px, #fff5be, rgba(0,0,0,0));
- background-repeat:repeat;
- background-size: 450px 450px;
- animation: starsTwinkle 4s ease-in-out infinite alternate;
- opacity:.9;
-}
-@keyframes starsTwinkle{
- 0%{opacity:.6;transform:scale(0.98);}
- 100%{opacity:1;transform:scale(1.02);}
-}
-
-.sky-moon{
- position:absolute;top:35px;right:40px;
- width:110px;height:110px;border-radius:50%;
- background:radial-gradient(circle at 35% 35%, #ffffff 0%, #fff4c2 30%, #ecd06b 70%, #c9a433 100%);
- box-shadow:0 0 50px rgba(255,230,130,0.6), 0 0 100px rgba(255,215,80,0.3), inset -12px -10px 0px rgba(160,125,25,0.35);
- animation:moonFloat 7s ease-in-out infinite alternate;
- z-index:0;
-}
-/* تفاصيل التضاريس البسيطة على سطح القمر ليعطي شكل واقعي */
-.sky-moon::before{
- content:"";position:absolute;top:22px;left:25px;width:22px;height:22px;
- border-radius:50%;background:rgba(180,145,40,0.18);box-shadow:25px 30px 0 -3px rgba(180,145,40,0.15), 10px 45px 0 -5px rgba(180,145,40,0.2);
-}
-
-@keyframes moonFloat{
- 0%{transform:translateY(0) rotate(-3deg);}
- 100%{transform:translateY(12px) rotate(3deg);}
-}
-
-/* ===== طبقة التأثيرات الجوية الجديدة ===== */
+/* ===== طبقة التأثيرات الجوية (سحب، مطر، برق كل 5 ثواني) ===== */
 #weatherEffects{
  position:fixed;inset:0;overflow:hidden;
  pointer-events:none;z-index:0;
@@ -90,106 +45,58 @@ button:focus-visible,input:focus-visible{
 }
 .app{max-width:720px;margin:auto;padding:16px 15px 28px;position:relative;z-index:1}
 
-/* الشمس وأشعتها */
-.effect-sun{
- width:110px;height:110px;top:8%;left:8%;
- border-radius:50%;
- background:radial-gradient(circle,#fff9c9 0%,#ffe46b 22%,#ffbd37 48%,transparent 72%);
- filter:drop-shadow(0 0 20px #ffc83d80);
- animation:sunFloat 7s ease-in-out infinite
-}
-.effect-rays{
- width:190px;height:190px;top:calc(8% - 40px);left:calc(8% - 40px);
- border-radius:50%;
- background:repeating-conic-gradient(
-  from 0deg,transparent 0deg,transparent 12deg,#ffdf6b24 13deg,#ffdf6b24 16deg,transparent 17deg,transparent 30deg
- );
- -webkit-mask:radial-gradient(circle,transparent 0 35%,#000 48%,transparent 72%);
- mask:radial-gradient(circle,transparent 0 35%,#000 48%,transparent 72%);
- animation:rayRotate 45s linear infinite
-}
-@keyframes sunFloat{
- 0%,100%{transform:translateY(0) scale(1)}
- 50%{transform:translateY(9px) scale(1.05)}
-}
-@keyframes rayRotate{to{transform:rotate(360deg)}}
-
-/* السحب المتحركة */
+/* السحب المتحركة في الخلفية */
 .effect-cloud{
- width:145px;height:42px;border-radius:50px;
- background:linear-gradient(180deg,#d9e8ff65,#879cce35);
+ width:180px;height:55px;border-radius:50px;
+ background:linear-gradient(180deg,rgba(217,232,255,0.45),rgba(135,156,206,0.25));
  filter:blur(1px);
- box-shadow:0 8px 22px #809bd020;
- animation:cloudMove 19s ease-in-out infinite alternate
+ box-shadow:0 8px 25px rgba(128,155,208,0.15);
+ animation:cloudMove 15s ease-in-out infinite alternate;
+ z-index:0;
 }
 .effect-cloud::before,.effect-cloud::after{
  content:"";position:absolute;border-radius:50%;
  background:inherit
 }
-.effect-cloud::before{width:66px;height:66px;top:-30px;left:24px}
-.effect-cloud::after{width:84px;height:76px;top:-42px;left:65px}
-.effect-cloud.c1{top:23%;left:-50px}
-.effect-cloud.c2{top:53%;right:-55px;transform:scale(.85);animation-duration:25s;animation-delay:-8s}
-.effect-cloud.c3{top:75%;left:15%;transform:scale(.65);animation-duration:28s;animation-delay:-13s}
+.effect-cloud::before{width:80px;height:80px;top:-35px;left:30px}
+.effect-cloud::after{width:100px;height:90px;top:-50px;left:75px}
+.effect-cloud.c1{top:15%;left:-60px;animation-duration:18s;}
+.effect-cloud.c2{top:35%;right:-70px;transform:scale(.9);animation-duration:22s;animation-delay:-5s;}
+.effect-cloud.c3{top:60%;left:10%;transform:scale(.75);animation-duration:25s;animation-delay:-10s;}
 @keyframes cloudMove{
- from{translate:-15px 0}
- to{translate:65px 9px}
+ from{transform:translateX(-20px)}
+ to{transform:translateX(80px)}
 }
 
-/* قطرات المطر */
+/* قطرات المطر الواضحة والغزيرة */
 .effect-rain{
- top:-35px;width:2px;height:24px;border-radius:5px;
- background:linear-gradient(transparent,#b6dfffad);
- box-shadow:0 0 4px #76baff32;
- animation:rainFall linear infinite
+ top:-35px;width:2px;height:22px;border-radius:5px;
+ background:linear-gradient(transparent,rgba(182,223,255,0.85));
+ box-shadow:0 0 6px rgba(118,186,255,0.4);
+ animation:rainFall 0.8s linear infinite;
+ z-index:0;
 }
 @keyframes rainFall{
  0%{transform:translate3d(0,-5vh,0);opacity:0}
- 10%{opacity:.65}
- 90%{opacity:.45}
- 100%{transform:translate3d(-35px,110vh,0);opacity:0}
+ 10%{opacity:.8}
+ 90%{opacity:.6}
+ 100%{transform:translate3d(-20px,105vh,0);opacity:0}
 }
 
-/* رقاقات الثلج */
-.effect-snow{
- top:-15px;border-radius:50%;
- background:#fff;
- box-shadow:0 0 8px #d9efff9c;
- animation:snowFall linear infinite
-}
-@keyframes snowFall{
- 0%{transform:translate3d(0,-5vh,0) rotate(0deg);opacity:0}
- 10%{opacity:.85}
- 50%{transform:translate3d(25px,50vh,0) rotate(180deg)}
- 100%{transform:translate3d(-20px,110vh,0) rotate(360deg);opacity:.1}
-}
-
-/* الضباب */
-.effect-fog{
- left:-20%;width:140%;height:95px;border-radius:50%;
- background:linear-gradient(90deg,transparent,#d7e5ff14,#e6efff2d,#d7e5ff14,transparent);
- filter:blur(17px);
- animation:fogMove 12s ease-in-out infinite alternate
-}
-.effect-fog.f1{top:32%}
-.effect-fog.f2{top:43%;animation-delay:-6s;animation-duration:17s}
-.effect-fog.f3{top:61%;animation-delay:-3s;animation-duration:20s}
-@keyframes fogMove{
- from{transform:translateX(-7%)}
- to{transform:translateX(7%)}
-}
-
-/* ومضات البرق */
+/* ومضات البرق (تتكرر تماماً كل 5 ثواني) */
 #lightningFlash{
- position:absolute;inset:0;
- background:rgba(206,225,255,.2);
- opacity:0;animation:lightningFlash 7s infinite;
+ position:fixed;inset:0;
+ background:rgba(230,240,255,0.75);
+ opacity:0;
+ pointer-events:none;
+ z-index:0;
+ animation: lightningTimer 5s infinite;
 }
-@keyframes lightningFlash{
- 0%,86%,88%,91%,100%{opacity:0}
- 87%{opacity:.45}
- 89%{opacity:.06}
- 90%{opacity:.3}
+@keyframes lightningTimer{
+ 0%, 94%, 98%, 100% { opacity: 0; }
+ 95% { opacity: 0.9; }
+ 96% { opacity: 0.2; }
+ 97% { opacity: 0.7; }
 }
 
 /* تقليل الحركة للمستخدمين الذين يفضلون ذلك */
@@ -376,21 +283,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  .project-box strong{font-size:11px}
  .search .primary{padding:12px}
  .forecast-row{gap:6px;font-size:11px}
- .sky-moon{width:80px;height:80px;top:20px;right:15px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- طبقة خلفية السماء والنجوم والقمر المتحركة والبارزة -->
-<div class="sky-night-bg" id="skyNightBg" aria-hidden="true">
- <div class="sky-stars"></div>
- <div class="sky-moon"></div>
-</div>
-
-<!-- طبقة التأثيرات: خلف المحتوى ولا تعطل الأزرار -->
+<!-- طبقة التأثيرات: سحب متحركة، مطر، وبرق يتكرر كل 5 ثواني -->
 <div id="weatherEffects" aria-hidden="true">
+ <div class="effect effect-cloud c1"></div>
+ <div class="effect effect-cloud c2"></div>
+ <div class="effect effect-cloud c3"></div>
  <div id="lightningFlash"></div>
 </div>
 
@@ -441,7 +344,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
    <h2>توقعات الساعات</h2>
    <span class="muted">خلال 24 ساعة</span>
   </div>
-  <div class="hourly" id="hourly"><div class="status">جاري التحميل...</div></div>
+  <div class="hourly" id="hourly"><div class="status">جاري تحميل التوقعات...</div></div>
  </section>
 
  <section class="card">
@@ -492,92 +395,22 @@ function setTheme(value){
 setTheme(theme);
 $("themeButton").addEventListener("click",()=>setTheme(theme==="dark"?"light":"dark"));
 
-/* ===== محرك التأثيرات الجوية والطقس ===== */
+/* ===== محرك التأثيرات الجوية (سحب ومطر مستمر مع البرق) ===== */
 function updateWeatherEffects(code,isDay=true){
  const layer=$("weatherEffects");
- layer.replaceChildren();
+ 
+ // نحافظ على السحب والبرق ثابتين في الخلفية، ونضيف المطر ديناميكياً
+ layer.querySelectorAll('.effect-rain').forEach(el => el.remove());
 
- const addEffect=(className,styles={})=>{
-  const el=document.createElement("div");
-  el.className="effect "+className;
-  Object.assign(el.style,styles);
-  layer.appendChild(el);
-  return el;
- };
-
- // السماء الصافية أو المشمسة
- if(code===0){
-  if(isDay){
-   addEffect("effect-rays");
-   addEffect("effect-sun");
-  }
-  return;
- }
-
- // الغيوم
- if([1,2,3].includes(code)){
-  const count=code===1?2:3;
-  for(let i=0;i<count;i++){
-   addEffect("effect-cloud c"+(i+1),{
-    opacity:code===3?".27":".38",
-    animationDelay:(-i*5)+"s"
-   });
-  }
-  if(code===1&&isDay){
-   addEffect("effect-rays",{opacity:".25"});
-  }
-  return;
- }
-
- // الضباب
- if([45,48].includes(code)){
-  for(let i=1;i<=3;i++){
-   addEffect("effect-fog f"+i,{opacity:String(.65-i*.1)});
-  }
-  return;
- }
-
- // المطر والرذاذ والعواصف
- if([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)){
-  const storm=[95,96,99].includes(code);
-  const heavy=[65,67,82,96,99].includes(code);
-  const drizzle=[51,53,56,57].includes(code);
-  const count=drizzle?18:(heavy?58:35);
-
-  for(let i=0;i<count;i++){
-   const size=drizzle?1:1.5+Math.random()*1.2;
-   addEffect("effect-rain",{
-    left:(Math.random()*105-3)+"%",
-    animationDuration:(drizzle?1.5:heavy?.55:1.0)+Math.random()*(drizzle?1.5:1.1)+"s",
-    animationDelay:(-Math.random()*5)+"s",
-    height:(drizzle?10:14+Math.random()*18)+"px",
-    width:size+"px",
-    opacity:String(.25+Math.random()*.45)
-   });
-  }
-
-  if(storm){
-   addEffect("effect-cloud c1",{opacity:".42"});
-   addEffect("effect-cloud c2",{opacity:".3"});
-   addEffect("effect-cloud c3",{opacity:".25"});
-   const flash=addEffect("");
-   flash.id="lightningFlash";
-  }
-  return;
- }
-
- // الثلوج
- if([71,73,75,77,85,86].includes(code)){
-  for(let i=0;i<35;i++){
-   const size=3+Math.random()*5;
-   addEffect("effect-snow",{
-    left:Math.random()*100+"%",
-    width:size+"px",height:size+"px",
-    animationDuration:(5+Math.random()*8)+"s",
-    animationDelay:(-Math.random()*10)+"s",
-    opacity:String(.35+Math.random()*.55)
-   });
-  }
+ // توليد قطرات المطر لتكون باينة وغزيرة
+ for(let i=0; i<45; i++){
+  const rain=document.createElement("div");
+  rain.className="effect effect-rain";
+  rain.style.left=(Math.random()*105-3)+"%";
+  rain.style.animationDuration=(0.6+Math.random()*0.5)+"s";
+  rain.style.animationDelay=(-Math.random()*3)+"s";
+  rain.style.opacity=String(0.4+Math.random()*0.5);
+  layer.appendChild(rain);
  }
 }
 
@@ -655,7 +488,6 @@ async function loadWeather(lat,lon,name){
   const c=data.current,d=data.daily,h=data.hourly;
   const info=weatherInfo(c.weather_code,c.is_day===1);
 
-  // تحديث التأثيرات طبقًا لحالة الطقس الحقيقية
   updateWeatherEffects(c.weather_code,c.is_day===1);
 
   $("cityName").textContent=name;
@@ -843,7 +675,7 @@ $("searchForm").addEventListener("submit",async e=>{
   const url="https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(query)+"&count=10&language=ar&format=json";
   const response=await fetch(url);
   if(!response.ok)throw Error("geo");
-  const result=await response.json();
+  const result=json=await response.json();
   if(!result.results?.length){
    setStatus("لم نعثر على المكان. جرّب الاسم بالإنجليزية أو أضف الدولة.",true);
    return;
