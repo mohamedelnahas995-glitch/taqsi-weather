@@ -105,6 +105,31 @@ button:focus-visible,input:focus-visible{
  #weatherEffects{opacity:.22}
 }
 
+/* ===== إضافات الأفكار الجديدة (التصميم والتنسيق) ===== */
+.quick-cities{
+ display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:5px;
+ scrollbar-width:none;
+}
+.quick-cities::-webkit-scrollbar{display:none}
+.city-pill{
+ background:var(--card2);border:1px solid var(--border);color:var(--text);
+ padding:6px 12px;border-radius:20px;font-size:11px;white-space:nowrap;cursor:pointer;
+ transition:0.2s
+}
+.city-pill:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+.extra-controls{
+ display:flex;gap:8px;margin-bottom:12px;align-items:center;justify-content:space-between;
+ background:var(--card2);padding:8px 12px;border-radius:14px;border:1px solid var(--border);
+ font-size:12px;color:var(--muted)
+}
+.local-clock{font-weight:bold;color:var(--text)}
+.sound-btn,.unit-btn{
+ background:var(--card);border:1px solid var(--border);color:var(--text);
+ padding:5px 10px;border-radius:10px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px
+}
+.sound-btn.active{background:var(--green);color:#000;font-weight:bold;border-color:var(--green)}
+
 /* ===== تصميم طقسي الأصلي ===== */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 0 18px}
 .brand{font-size:27px;font-weight:900}
@@ -315,7 +340,28 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
   <input id="cityInput" placeholder="ابحث عن مدينة أو دولة..." aria-label="ابحث عن مدينة">
   <button class="primary" type="submit">بحث 🔎</button>
  </form>
+
+ <!-- فكرة 2: قائمة المدن المفضلة / السريعة -->
+ <div class="quick-cities">
+  <button type="button" class="city-pill" onclick="selectQuickCity('القاهرة', 30.0444, 31.2357)">القاهرة</button>
+  <button type="button" class="city-pill" onclick="selectQuickCity('الإسكندرية', 31.2001, 29.9187)">الإسكندرية</button>
+  <button type="button" class="city-pill" onclick="selectQuickCity('شبين الكوم', 30.5526, 31.009)">شبين الكوم</button>
+  <button type="button" class="city-pill" onclick="selectQuickCity('شرم الشيخ', 27.9158, 34.3299)">شرم الشيخ</button>
+  <button type="button" class="city-pill" onclick="selectQuickCity('أسوان', 24.0889, 32.8998)">أسوان</button>
+  <button type="button" class="city-pill" onclick="selectQuickCity('الغردقة', 27.2579, 33.8116)">الغردقة</button>
+ </div>
+
  <button class="location" id="locationButton">📍 استخدام موقعي الحالي</button>
+
+ <!-- فكرة 3 و 4 و 5: شريط الساعة المحلية، أصوات المطر، والتحويل (°C/°F) -->
+ <div class="extra-controls">
+  <div id="localTimeDisplay" class="local-clock">الساعة: --:--</div>
+  <div style="display:flex;gap:6px;">
+   <button type="button" class="sound-btn" id="soundBtn" title="تشغيل/إيقاف أصوات المطر والطبيعة">🔊 صوت المطر</button>
+   <button type="button" class="unit-btn" id="unitBtn">°C / °F</button>
+  </div>
+ </div>
+
  <div class="status" id="status" role="status">جاري تحميل بيانات الطقس...</div>
 
  <section class="card">
@@ -395,14 +441,97 @@ function setTheme(value){
 setTheme(theme);
 $("themeButton").addEventListener("click",()=>setTheme(theme==="dark"?"light":"dark"));
 
+/* متغيرات للتحكم بالوحدة (سيليزيوس / فهرنهايت) وأصوات الطبيعة */
+let isCelsius = true;
+let lastWeatherData = null;
+let rainAudio = null;
+let isSoundPlaying = false;
+
+/* فكرة 4: أصوات الطبيعة للمطر (باستخدام Web Audio API لتوليد صوت مطر حقيقي بدون روابط خارجية) */
+function toggleRainSound(){
+ if(!isSoundPlaying){
+  try {
+   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+   const bufferSize = audioCtx.sampleRate * 2;
+   const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+   const output = buffer.getChannelData(0);
+   for (let i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+   }
+   const whiteNoise = audioCtx.createBufferSource();
+   whiteNoise.buffer = buffer;
+   whiteNoise.loop = true;
+   
+   const filter = audioCtx.createBiquadFilter();
+   filter.type = 'lowpass';
+   filter.frequency.value = 800;
+   
+   const gainNode = audioCtx.createGain();
+   gainNode.gain.value = 0.15;
+   
+   whiteNoise.connect(filter);
+   filter.connect(gainNode);
+   gainNode.connect(audioCtx.destination);
+   whiteNoise.start();
+   
+   rainAudio = {ctx: audioCtx, source: whiteNoise};
+   isSoundPlaying = true;
+   $("soundBtn").textContent = "🔊 إيقاف الصوت";
+   $("soundBtn").classList.add("active");
+  } catch(e) {
+   alert("تعذر تشغيل الصوت في هذا المتصفح.");
+  }
+ } else {
+  if(rainAudio && rainAudio.ctx){
+   rainAudio.source.stop();
+   rainAudio.ctx.close();
+  }
+  isSoundPlaying = false;
+  $("soundBtn").textContent = "🔇 صوت المطر";
+  $("soundBtn").classList.remove("active");
+ }
+}
+$("soundBtn").addEventListener("click", toggleRainSound);
+
+/* فكرة 5: تحويل درجات الحرارة */
+function convertTemp(c){
+ if(isCelsius) return Math.round(c) + "°";
+ return Math.round((c * 9/5) + 32) + "°F";
+}
+
+$("unitBtn").addEventListener("click", () => {
+ isCelsius = !isCelsius;
+ $("unitBtn").textContent = isCelsius ? "°C / °F (سيليزيوس)" : "°F / °C (فهرنهايت)";
+ if(lastWeatherData) {
+  renderWeatherDetails(lastWeatherData);
+ }
+});
+
+/* فكرة 2: اختيار مدينة سريعة */
+function selectQuickCity(name, lat, lon){
+ loadWeather(lat, lon, name + "، مصر");
+}
+
+/* فكرة 3: تحديث الساعة المحلية للمكان */
+let clockInterval = null;
+function startLocalClock(timezoneOffsetSeconds = 0){
+ if(clockInterval) clearInterval(clockInterval);
+ const updateClock = () => {
+  const d = new Date();
+  // حساب التوقيت المحلي بناءً على الـ timezone
+  const localTime = new Date(d.getTime() + (d.getTimezoneOffset() * 60000) + (timezoneOffsetSeconds * 1000));
+  const timeStr = localTime.toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+  $("localTimeDisplay").textContent = "🕒 توقيت المدينه: " + timeStr;
+ };
+ updateClock();
+ clockInterval = setInterval(updateClock, 1000);
+}
+
 /* ===== محرك التأثيرات الجوية (سحب ومطر مستمر مع البرق) ===== */
 function updateWeatherEffects(code,isDay=true){
  const layer=$("weatherEffects");
- 
- // نحافظ على السحب والبرق ثابتين في الخلفية، ونضيف المطر ديناميكياً
  layer.querySelectorAll('.effect-rain').forEach(el => el.remove());
 
- // توليد قطرات المطر لتكون باينة وغزيرة
  for(let i=0; i<45; i++){
   const rain=document.createElement("div");
   rain.className="effect effect-rain";
@@ -485,25 +614,13 @@ async function loadWeather(lat,lon,name){
   if(!response.ok)throw Error("weather");
   const data=await response.json();
   if(id!==requestId)return;
-  const c=data.current,d=data.daily,h=data.hourly;
-  const info=weatherInfo(c.weather_code,c.is_day===1);
+  
+  lastWeatherData = data;
+  renderWeatherDetails(data);
 
-  updateWeatherEffects(c.weather_code,c.is_day===1);
+  // تشغيل الساعة المحلية بناءً على الفرق الزمني من الـ API
+  startLocalClock(data.utc_offset_seconds || 0);
 
-  $("cityName").textContent=name;
-  $("updated").textContent="آخر تحديث: "+c.time.replace("T"," ");
-  $("weatherIcon").textContent=info.icon;
-  $("temperature").innerHTML=Math.round(c.temperature_2m)+'<small>°C</small>';
-  $("description").textContent=info.text;
-  $("feels").textContent="درجة الحرارة المحسوسة: "+Math.round(c.apparent_temperature)+"°";
-  $("humidity").textContent=c.relative_humidity_2m+"%";
-  $("wind").textContent=Math.round(c.wind_speed_10m)+" كم/س";
-  $("maxTemp").textContent=Math.round(d.temperature_2m_max[0])+"°";
-  $("minTemp").textContent=Math.round(d.temperature_2m_min[0])+"°";
-
-  renderHourly(h,c.time);
-  renderForecast(d);
-  renderChart(d);
   setStatus("✅ تم تحديث بيانات الطقس");
   loadAirQuality(lat,lon,id);
  }catch(e){
@@ -513,6 +630,28 @@ async function loadWeather(lat,lon,name){
   $("forecast").textContent="تعذر تحميل التوقعات.";
   $("airContent").innerHTML='<div class="status">بيانات جودة الهواء غير متاحة حاليًا.</div>';
  }
+}
+
+function renderWeatherDetails(data){
+ const c=data.current, d=data.daily, h=data.hourly;
+ const info=weatherInfo(c.weather_code, c.is_day===1);
+
+ updateWeatherEffects(c.weather_code, c.is_day===1);
+
+ $("cityName").textContent=currentPlace.name;
+ $("updated").textContent="آخر تحديث: "+c.time.replace("T"," ");
+ $("weatherIcon").textContent=info.icon;
+ $("temperature").innerHTML=convertTemp(c.temperature_2m)+'<small>°</small>';
+ $("description").textContent=info.text;
+ $("feels").textContent="درجة الحرارة المحسوسة: "+convertTemp(c.apparent_temperature);
+ $("humidity").textContent=c.relative_humidity_2m+"%";
+ $("wind").textContent=Math.round(c.wind_speed_10m)+" كم/س";
+ $("maxTemp").textContent=convertTemp(d.temperature_2m_max[0]);
+ $("minTemp").textContent=convertTemp(d.temperature_2m_min[0]);
+
+ renderHourly(h,c.time);
+ renderForecast(d);
+ renderChart(d);
 }
 
 function renderHourly(h,currentTime){
@@ -532,7 +671,7 @@ function renderHourly(h,currentTime){
   icon.textContent=weatherInfo(h.weather_code[i],hr>=6&&hr<18).icon;
   const temp=document.createElement("div");
   temp.className="hour-temp";
-  temp.textContent=Math.round(h.temperature_2m[i])+"°";
+  temp.textContent=convertTemp(h.temperature_2m[i]);
   hour.append(time,icon,temp);
   $("hourly").appendChild(hour);
  }
@@ -565,11 +704,11 @@ function renderForecast(d){
 
   const high=document.createElement("div");
   high.className="day-high";
-  high.textContent=Math.round(d.temperature_2m_max[i])+"°";
+  high.textContent=convertTemp(d.temperature_2m_max[i]);
 
   const low=document.createElement("div");
   low.className="day-low";
-  low.textContent=Math.round(d.temperature_2m_min[i])+"°";
+  low.textContent=convertTemp(d.temperature_2m_min[i]);
 
   day.append(name,dateEl,desc,icon,high,low);
   $("forecast").appendChild(day);
@@ -586,7 +725,7 @@ function renderForecast(d){
   rowDesc.textContent=info.text;
   const temps=document.createElement("span");
   temps.className="row-temps";
-  temps.textContent=Math.round(d.temperature_2m_max[i])+"° / "+Math.round(d.temperature_2m_min[i])+"°";
+  temps.textContent=convertTemp(d.temperature_2m_max[i])+" / "+convertTemp(d.temperature_2m_min[i]);
   row.append(rowDay,rowIcon,rowDesc,temps);
   $("listView").appendChild(row);
  });
@@ -605,9 +744,9 @@ function renderChart(d){
  html+='<polyline class="chart-line chart-low" points="'+points(mins)+'"/>';
  maxs.forEach((v,i)=>{
   html+='<circle class="chart-dot" cx="'+x(i)+'" cy="'+y(v)+'" r="6"/>';
-  html+='<text x="'+x(i)+'" y="'+(y(v)-13)+'" text-anchor="middle">'+Math.round(v)+'°</text>';
+  html+='<text x="'+x(i)+'" y="'+(y(v)-13)+'" text-anchor="middle">'+convertTemp(v)+'</text>';
   html+='<circle class="chart-dot" cx="'+x(i)+'" cy="'+y(mins[i])+'" r="5"/>';
-  html+='<text x="'+x(i)+'" y="'+(y(mins[i])+23)+'" text-anchor="middle">'+Math.round(mins[i])+'°</text>';
+  html+='<text x="'+x(i)+'" y="'+(y(mins[i])+23)+'" text-anchor="middle">'+convertTemp(mins[i])+'</text>';
  });
  svg.innerHTML=html;
 }
@@ -675,7 +814,7 @@ $("searchForm").addEventListener("submit",async e=>{
   const url="https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(query)+"&count=10&language=ar&format=json";
   const response=await fetch(url);
   if(!response.ok)throw Error("geo");
-  const result=json=await response.json();
+  const result=await response.json();
   if(!result.results?.length){
    setStatus("لم نعثر على المكان. جرّب الاسم بالإنجليزية أو أضف الدولة.",true);
    return;
