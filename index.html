@@ -38,28 +38,53 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
  border-radius:13px;padding:10px 12px
 }
 .project{
- display:flex;align-items:center;justify-content:space-between;gap:10px;
- margin-bottom:18px;color:var(--muted);font-size:11px;line-height:1.9
+ display:flex;align-items:stretch;justify-content:space-between;
+ gap:10px;margin-bottom:18px;color:#fff4d6;font-size:11px;line-height:1.9
 }
-.project strong{color:var(--text);font-size:12px}
-.search{display:flex;gap:8px;margin-bottom:10px}
+.project-box{
+ position:relative;isolation:isolate;overflow:hidden;
+ border:1px solid #bba46d;border-radius:12px;
+ padding:8px 12px;background:rgba(8,20,38,.9);
+ box-shadow:0 0 12px #bba46d20;text-align:center;
+ flex:1;min-width:0
+}
+.project-box strong{
+ display:block;color:#fff;font-size:12px;font-weight:900
+}
+.project-box::before{
+ content:"";position:absolute;inset:0;padding:2px;border-radius:inherit;
+ background:conic-gradient(from var(--gold-angle),
+ transparent 0deg,transparent 275deg,#bba46d 300deg,
+ #fff0bd 320deg,#bba46d 335deg,transparent 360deg);
+ -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ pointer-events:none;z-index:5;animation:goldTravel 4s linear infinite
+}
+.search{
+ display:flex;gap:8px;margin-bottom:10px;position:relative;
+ isolation:isolate;border-radius:16px;padding:2px
+}
 .search input{
  min-width:0;flex:1;background:var(--card);color:var(--text);
- border:1px solid var(--border);border-radius:15px;padding:14px
+ border:1px solid var(--border);border-radius:13px;padding:14px;
+ position:relative;z-index:1
 }
 .primary{
- border:0;border-radius:15px;padding:12px 17px;
- background:var(--blue);color:white;font-weight:bold
+ border:0;border-radius:13px;padding:12px 17px;
+ background:var(--blue);color:white;font-weight:bold;
+ position:relative;isolation:isolate;overflow:hidden
 }
 .location{
  width:100%;border:1px solid var(--border);background:var(--card);
- color:var(--text);border-radius:14px;padding:12px;margin-bottom:10px
+ color:var(--text);border-radius:14px;padding:12px;margin-bottom:10px;
+ position:relative;isolation:isolate;overflow:hidden
 }
 .status{color:var(--muted);font-size:12px;text-align:center;line-height:1.8;padding:8px}
 .card{
  background:var(--card);border:1px solid var(--border);
  border-radius:25px;padding:20px;margin:15px 0;overflow:hidden;
- box-shadow:0 12px 35px #00000014
+ box-shadow:0 12px 35px #00000014;
+ position:relative;isolation:isolate
 }
 .card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .card h2{font-size:17px;margin:0}
@@ -75,7 +100,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 .metric{
  text-align:center;background:var(--card2);border-radius:16px;
- padding:14px 5px;border:1px solid var(--border);min-width:0
+ padding:14px 5px;border:1px solid var(--border);min-width:0;
+ position:relative;isolation:isolate;overflow:hidden
 }
 .metric-icon{font-size:23px;margin-bottom:9px}
 .metric-label{font-size:11px;color:var(--muted);margin-bottom:8px}
@@ -93,7 +119,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 .hour-temp{font-size:19px;font-weight:bold}
 .toggle{
  display:flex;background:var(--card2);border:1px solid var(--border);
- border-radius:30px;padding:4px;gap:3px
+ border-radius:30px;padding:4px;gap:3px;position:relative;isolation:isolate
 }
 .toggle button{
  border:0;background:transparent;color:var(--muted);
@@ -102,7 +128,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 .toggle button.active{background:#293456;color:white}
 body.light .toggle button.active{background:#dce6ff;color:#17346d}
 .forecast{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:22px}
-.day{text-align:center;min-width:0;padding:12px 2px 8px}
+.day{text-align:center;min-width:0;padding:12px 2px 8px;position:relative;isolation:isolate;border-radius:14px}
 .day-name{font-size:13px;font-weight:bold;white-space:nowrap}
 .day-date{font-size:11px;color:var(--muted);margin:9px 0 18px}
 .day-desc{font-size:10px;line-height:1.7;min-height:30px;color:var(--muted)}
@@ -139,10 +165,63 @@ body.light .toggle button.active{background:#dce6ff;color:#17346d}
 }
 .aqi-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 .air-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:18px}
-.air-item{background:var(--card2);border:1px solid var(--border);padding:13px;border-radius:14px}
+.air-item{
+ background:var(--card2);border:1px solid var(--border);padding:13px;
+ border-radius:14px;position:relative;isolation:isolate;overflow:hidden
+}
 .air-item span{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
 .air-item strong{font-size:16px}
 footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;padding:22px 0}
+
+/* تعريف زوايا الإطارات المتحركة */
+@property --neon-angle{
+ syntax:"<angle>";initial-value:0deg;inherits:false
+}
+@property --gold-angle{
+ syntax:"<angle>";initial-value:0deg;inherits:false
+}
+
+/* النيون الأزرق والسماوي حول المستطيلات */
+.card::before,
+.metric::before,
+.day::before,
+.location::before,
+.small-btn::before,
+.primary::before,
+.search::before,
+.toggle::before,
+.air-item::before{
+ content:"";position:absolute;inset:0;padding:2px;border-radius:inherit;
+ background:conic-gradient(from var(--neon-angle),
+ transparent 0deg,transparent 250deg,
+ #4778ff 285deg,#35e8ff 315deg,#fff 325deg,
+ #35e8ff 338deg,transparent 360deg);
+ -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ pointer-events:none;z-index:5;animation:neonTravel 3s linear infinite
+}
+
+/* منع تداخل الإطار مع الكتابة */
+.search::before{pointer-events:none}
+.primary{overflow:hidden}
+.primary::before{z-index:-1}
+.small-btn{position:relative;isolation:isolate;overflow:hidden}
+.hour{position:relative;isolation:isolate}
+.hour::after{
+ content:"";position:absolute;inset:-5px;border:1px solid transparent;
+ border-radius:12px;pointer-events:none
+}
+
+/* حركة الإطارات */
+@keyframes neonTravel{to{--neon-angle:360deg}}
+@keyframes goldTravel{to{--gold-angle:360deg}}
+
+@media(prefers-reduced-motion:reduce){
+ .card::before,.metric::before,.day::before,.location::before,
+ .small-btn::before,.primary::before,.search::before,.toggle::before,
+ .air-item::before,.project-box::before{animation:none}
+}
+
 @media(max-width:430px){
  .app{padding:12px}
  .card{padding:15px;border-radius:21px}
@@ -152,7 +231,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  .day-desc{font-size:9px}
  .day-icon{font-size:24px}
  .temperature{font-size:75px}
- .project{font-size:10px}
+ .project{font-size:10px;gap:6px}
+ .project-box{padding:7px 5px}
+ .project-box strong{font-size:11px}
  .search .primary{padding:12px}
  .forecast-row{gap:6px;font-size:11px}
 }
@@ -171,8 +252,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  </div>
 
  <div class="project">
-  <div>برنامج متابعة حالة الطقس<br><strong>مصطفى ماهر عبد المنعم النحاس</strong></div>
-  <div style="text-align:left">المشروع رقم 166<br><strong>إشراف الدكتور رشدي فاروق</strong></div>
+  <div class="project-box">طالب المشروع<strong>مصطفى ماهر عبد المنعم النحاس</strong></div>
+  <div class="project-box">رقم المشروع 166<strong>إشراف الدكتور رشدي فاروق</strong></div>
  </div>
 
  <form class="search" id="searchForm">
@@ -248,12 +329,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-
-let theme = "dark";
-try {
- theme = localStorage.getItem("taqsi-theme") || "dark";
-} catch(e) {}
+const $=id=>document.getElementById(id);
+let theme="dark";
+try{theme=localStorage.getItem("taqsi-theme")||"dark"}catch(e){}
 
 function setTheme(value){
  document.body.classList.toggle("light",value==="light");
@@ -291,7 +369,6 @@ const dayNames=["الأحد","الاثنين","الثلاثاء","الأربعا
 const monthNames=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 let currentPlace={lat:30.0444,lon:31.2357,name:"القاهرة، مصر"};
 let requestId=0;
-let lastDaily=null;
 
 function setStatus(message,error=false){
  $("status").textContent=message;
@@ -315,10 +392,6 @@ function localDate(date){
  return new Date(+parts[0],+parts[1]-1,+parts[2]);
 }
 
-function safeText(element,value){
- element.textContent=value;
-}
-
 async function loadWeather(lat,lon,name){
  const id=++requestId;
  currentPlace={lat,lon,name};
@@ -340,27 +413,24 @@ async function loadWeather(lat,lon,name){
   if(!response.ok)throw Error("weather");
   const data=await response.json();
   if(id!==requestId)return;
-
   const c=data.current,d=data.daily,h=data.hourly;
   const info=weatherInfo(c.weather_code,c.is_day===1);
 
-  safeText($("cityName"),name);
-  safeText($("updated"),"آخر تحديث: "+c.time.replace("T"," "));
+  $("cityName").textContent=name;
+  $("updated").textContent="آخر تحديث: "+c.time.replace("T"," ");
   $("weatherIcon").textContent=info.icon;
   $("temperature").innerHTML=Math.round(c.temperature_2m)+'<small>°C</small>';
-  safeText($("description"),info.text);
-  safeText($("feels"),"درجة الحرارة المحسوسة: "+Math.round(c.apparent_temperature)+"°");
-  safeText($("humidity"),c.relative_humidity_2m+"%");
-  safeText($("wind"),Math.round(c.wind_speed_10m)+" كم/س");
-  safeText($("maxTemp"),Math.round(d.temperature_2m_max[0])+"°");
-  safeText($("minTemp"),Math.round(d.temperature_2m_min[0])+"°");
+  $("description").textContent=info.text;
+  $("feels").textContent="درجة الحرارة المحسوسة: "+Math.round(c.apparent_temperature)+"°";
+  $("humidity").textContent=c.relative_humidity_2m+"%";
+  $("wind").textContent=Math.round(c.wind_speed_10m)+" كم/س";
+  $("maxTemp").textContent=Math.round(d.temperature_2m_max[0])+"°";
+  $("minTemp").textContent=Math.round(d.temperature_2m_min[0])+"°";
 
   renderHourly(h,c.time);
   renderForecast(d);
-  lastDaily=d;
   renderChart(d);
   setStatus("✅ تم تحديث بيانات الطقس");
-
   loadAirQuality(lat,lon,id);
  }catch(e){
   if(id!==requestId)return;
@@ -384,7 +454,8 @@ function renderHourly(h,currentTime){
   time.textContent=i===start?"الآن":h.time[i].slice(11,16);
   const icon=document.createElement("div");
   icon.className="hour-icon";
-  icon.textContent=weatherInfo(h.weather_code[i],Number(h.time[i].slice(11,13))>=6&&Number(h.time[i].slice(11,13))<18).icon;
+  const hr=Number(h.time[i].slice(11,13));
+  icon.textContent=weatherInfo(h.weather_code[i],hr>=6&&hr<18).icon;
   const temp=document.createElement("div");
   temp.className="hour-temp";
   temp.textContent=Math.round(h.temperature_2m[i])+"°";
@@ -398,8 +469,7 @@ function renderForecast(d){
  $("listView").innerHTML="";
 
  d.time.forEach((date,i)=>{
-  const dt=localDate(date);
-  const info=weatherInfo(d.weather_code[i]);
+  const dt=localDate(date),info=weatherInfo(d.weather_code[i]);
   const day=document.createElement("div");
   day.className="day";
 
@@ -457,10 +527,8 @@ function renderChart(d){
  const x=i=>left+i*(W-left-right)/(d.time.length-1);
  const y=v=>top+(max-v)*(H-top-bottom)/(max-min);
  const points=values=>values.map((v,i)=>x(i)+","+y(v)).join(" ");
- let html="";
- html+='<polyline class="chart-line" points="'+points(maxs)+'"/>';
+ let html='<polyline class="chart-line" points="'+points(maxs)+'"/>';
  html+='<polyline class="chart-line chart-low" points="'+points(mins)+'"/>';
-
  maxs.forEach((v,i)=>{
   html+='<circle class="chart-dot" cx="'+x(i)+'" cy="'+y(v)+'" r="6"/>';
   html+='<text x="'+x(i)+'" y="'+(y(v)-13)+'" text-anchor="middle">'+Math.round(v)+'°</text>';
@@ -486,23 +554,21 @@ $("listButton").addEventListener("click",()=>{
 async function loadAirQuality(lat,lon,id){
  const url="https://air-quality-api.open-meteo.com/v1/air-quality?latitude="+lat+
  "&longitude="+lon+"&current=us_aqi,european_aqi,pm2_5,pm10&timezone=auto";
-
  try{
   const response=await fetch(url);
   if(!response.ok)throw Error("air");
   const data=await response.json();
   if(id!==requestId)return;
-  const c=data.current;
-  const aqi=c.us_aqi;
+  const c=data.current,aqi=c.us_aqi;
   if(aqi===null||aqi===undefined)throw Error("no aqi");
 
   let label,description;
-  if(aqi<=50){label="جيدة";description="جودة الهواء جيدة، ويكون التلوث قليلًا أو غير مؤثر عادةً."}
-  else if(aqi<=100){label="متوسطة";description="جودة الهواء مقبولة عمومًا، وقد يتأثر بعض الأشخاص الأكثر حساسية."}
-  else if(aqi<=150){label="غير صحية للفئات الحساسة";description="قد تتأثر الفئات الحساسة، ويُفضّل تقليل المجهود الخارجي عند الشعور بأعراض."}
-  else if(aqi<=200){label="غير صحية";description="قد تتأثر صحة بعض الأشخاص، ويُنصح بتقليل الأنشطة الخارجية الطويلة."}
-  else if(aqi<=300){label="سيئة جدًا";description="يُنصح بتجنب المجهود الخارجي وتقليل التعرض للهواء الملوث."}
-  else{label="خطيرة";description="مستوى التلوث مرتفع جدًا؛ تجنب الأنشطة الخارجية قدر الإمكان."}
+  if(aqi<=50){label="جيدة";description="جودة الهواء جيدة، والتلوث قليل عادةً."}
+  else if(aqi<=100){label="متوسطة";description="قد يتأثر بعض الأشخاص الأكثر حساسية."}
+  else if(aqi<=150){label="غير صحية للفئات الحساسة";description="يُفضّل تقليل المجهود الخارجي للفئات الحساسة."}
+  else if(aqi<=200){label="غير صحية";description="يُنصح بتقليل الأنشطة الخارجية الطويلة."}
+  else if(aqi<=300){label="سيئة جدًا";description="يُنصح بتجنب المجهود الخارجي قدر الإمكان."}
+  else{label="خطيرة";description="التلوث مرتفع جدًا؛ قلل التعرض للهواء الخارجي."}
 
   const pct=Math.max(0,Math.min(100,aqi/300*100));
   $("airContent").innerHTML=
@@ -515,11 +581,10 @@ async function loadAirQuality(lat,lon,id){
    '<div class="air-item"><span>الجسيمات PM10</span><strong>'+(c.pm10==null?"غير متاح":Number(c.pm10).toFixed(1)+" µg/m³")+'</strong></div>'+
    '<div class="air-item"><span>المؤشر الأمريكي AQI</span><strong>'+Math.round(aqi)+'</strong></div>'+
    '<div class="air-item"><span>المؤشر الأوروبي AQI</span><strong>'+(c.european_aqi==null?"غير متاح":Math.round(c.european_aqi))+'</strong></div>'+
-   '</div>'+
-   '<div class="muted" style="margin-top:14px">المصدر: Open-Meteo Air Quality. قد تختلف البيانات حسب الموقع ووقت التحديث.</div>';
+   '</div><div class="muted" style="margin-top:14px">المصدر: Open-Meteo Air Quality</div>';
  }catch(e){
   if(id!==requestId)return;
-  $("airContent").innerHTML='<div class="status">تعذر الحصول على بيانات جودة الهواء لهذا الموقع حاليًا. الطقس يعمل بشكل مستقل.</div>';
+  $("airContent").innerHTML='<div class="status">تعذر الحصول على بيانات جودة الهواء حاليًا. الطقس يعمل بشكل مستقل.</div>';
  }
 }
 
@@ -527,15 +592,13 @@ $("searchForm").addEventListener("submit",async e=>{
  e.preventDefault();
  const query=$("cityInput").value.trim();
  if(query.length<2){setStatus("اكتب اسم مدينة أو دولة أولًا.",true);return;}
-
  const normalized=query.replace(/\s+/g," ").toLocaleLowerCase("ar");
  const local=Object.keys(cities).find(k=>k.toLocaleLowerCase("ar")===normalized);
  if(local){loadWeather(cities[local][0],cities[local][1],local+"، مصر");return;}
 
  setStatus("🔎 جاري البحث عن المكان...");
  try{
-  const url="https://geocoding-api.open-meteo.com/v1/search?name="+
-   encodeURIComponent(query)+"&count=10&language=ar&format=json";
+  const url="https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(query)+"&count=10&language=ar&format=json";
   const response=await fetch(url);
   if(!response.ok)throw Error("geo");
   const result=await response.json();
@@ -549,7 +612,7 @@ $("searchForm").addEventListener("submit",async e=>{
   const parts=[place.name,place.admin1,place.country].filter(Boolean);
   loadWeather(place.latitude,place.longitude,[...new Set(parts)].join("، "));
  }catch(e){
-  setStatus("تعذر البحث. تأكد من اتصال الإنترنت وحاول مرة أخرى.",true);
+  setStatus("تعذر البحث. تأكد من الإنترنت وحاول مرة أخرى.",true);
  }
 });
 
