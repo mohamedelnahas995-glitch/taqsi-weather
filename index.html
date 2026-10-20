@@ -348,7 +348,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  <div class="extra-controls">
   <div id="localTimeDisplay" class="local-clock">الساعة: --:--</div>
   <div style="display:flex;gap:6px;">
-   <button type="button" class="sound-btn" id="soundBtn">🔊 صوت المطر والبرق</button>
+   <button type="button" class="sound-btn" id="soundBtn">🔊 صوت المطر</button>
    <button type="button" class="unit-btn" id="unitBtn">°C / °F</button>
   </div>
  </div>
@@ -502,15 +502,14 @@ let lastWeatherData = null;
 let audioCtx = null;
 let rainGainNode = null;
 let isSoundPlaying = false;
-let thunderInterval = null;
 
-/* ===== توليد الصوت السينمائي للمطر + البرق والرعد الواقعي ===== */
+/* ===== تشغيل/إيقاف صوت المطر فقط ===== */
 function startWeatherAudio(){
  if(!isSoundPlaying){
   try {
    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
    
-   // 1. صوت المطر المستمر
+   // صوت المطر المستمر
    const bufferSize = audioCtx.sampleRate * 2;
    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
    const output = buffer.getChannelData(0);
@@ -532,32 +531,8 @@ function startWeatherAudio(){
    rainGainNode.connect(audioCtx.destination);
    whiteNoise.start();
 
-   // 2. صوت البرق والرعد المؤثر كل 5 ثواني
-   const playThunderSound = () => {
-    if(!isSoundPlaying || !audioCtx) return;
-    
-    const osc = audioCtx.createOscillator();
-    const tGain = audioCtx.createGain();
-    
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1.2);
-    
-    tGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-    tGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-    
-    osc.connect(tGain);
-    tGain.connect(audioCtx.destination);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 1.5);
-   };
-
-   thunderInterval = setInterval(playThunderSound, 5000);
-   playThunderSound();
-
    isSoundPlaying = true;
-   $("soundBtn").textContent = "🔊 إيقاف الأصوات";
+   $("soundBtn").textContent = "🔊 إيقاف الصوت";
    $("soundBtn").classList.add("active");
   } catch(e) {
    alert("تعذر تشغيل الصوت في المتصفح الحالي.");
@@ -567,9 +542,8 @@ function startWeatherAudio(){
    audioCtx.close();
    audioCtx = null;
   }
-  if(thunderInterval) clearInterval(thunderInterval);
   isSoundPlaying = false;
-  $("soundBtn").textContent = "🔇 صوت المطر والبرق";
+  $("soundBtn").textContent = "🔇 صوت المطر";
   $("soundBtn").classList.remove("active");
  }
 }
@@ -601,7 +575,7 @@ function startLocalClock(timezoneOffsetSeconds = 0){
  clockInterval = setInterval(updateClock, 1000);
 }
 
-/* ===== محرك التأثيرات الجوية (سحب ومطر مستمر مع البرق) ===== */
+/* ===== محرك التأثيرات الجوية (سحب ومطر مستمر) ===== */
 function updateWeatherEffects(code,isDay=true){
  const layer=$("weatherEffects");
  layer.querySelectorAll('.effect-rain').forEach(el => el.remove());
