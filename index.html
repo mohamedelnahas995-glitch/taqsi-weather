@@ -105,8 +105,11 @@ button:focus-visible,input:focus-visible{
 }
 
 /* ===== شريط المحافظات والمدن السريع ===== */
+.quick-bar-wrapper{
+ display:flex;flex-direction:column;gap:8px;margin-bottom:10px;
+}
 .quick-cities{
- display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:8px;
+ display:flex;gap:6px;overflow-x:auto;padding-bottom:5px;
  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
 }
 .city-pill{
@@ -115,6 +118,47 @@ button:focus-visible,input:focus-visible{
  transition:0.2s
 }
 .city-pill:hover,.city-pill.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* زرار الخريطة الجديد */
+.map-launcher-btn{
+ width:100%;background:linear-gradient(135deg, #1d3557, #111c43);
+ border:1px solid var(--blue);color:var(--text);padding:10px;border-radius:14px;
+ font-size:12px;font-weight:bold;cursor:pointer;display:flex;align-items:center;
+ justify-content:center;gap:8px;transition:0.2s;box-shadow:0 4px 15px rgba(53,132,255,0.15)
+}
+.map-launcher-btn:hover{background:var(--blue);color:#fff}
+
+/* نافذة الخريطة التفاعلية (Modal) */
+.map-modal{
+ position:fixed;inset:0;background:rgba(4,8,20,0.85);z-index:100;
+ display:flex;align-items:center;justify-content:center;padding:15px;
+ backdrop-filter:blur(5px);animation: fadeIn 0.3s ease;
+}
+.map-modal.hidden{display:none!important}
+.map-modal-content{
+ background:var(--card);border:1px solid var(--border);border-radius:22px;
+ width:100%;max-width:500px;padding:20px;box-shadow:0 15px 35px rgba(0,0,0,0.4);
+ display:flex;flex-direction:column;gap:15px;position:relative
+}
+.map-modal-header{display:flex;justify-content:space-between;align-items:center}
+.map-modal-header h3{margin:0;font-size:16px;color:var(--accent)}
+.close-modal{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer}
+.map-search-input{
+ width:100%;background:var(--card2);border:1px solid var(--border);
+ color:var(--text);padding:12px;border-radius:12px;font-size:13px
+}
+.map-cities-grid{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+ max-height:250px;overflow-y:auto;padding-right:2px;scrollbar-width:thin
+}
+.map-city-item{
+ background:var(--card2);border:1px solid var(--border);padding:10px;
+ border-radius:12px;text-align:center;font-size:12px;cursor:pointer;
+ transition:0.2s;color:var(--text)
+}
+.map-city-item:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 .extra-controls{
  display:flex;gap:8px;margin-bottom:12px;align-items:center;justify-content:space-between;
@@ -128,7 +172,18 @@ button:focus-visible,input:focus-visible{
 }
 .sound-btn.active{background:var(--green);color:#000;font-weight:bold;border-color:var(--green)}
 
-/* ===== تصميم طقسي الأصلي ===== */
+/* مساعد الملابس الذكي */
+.outfit-card{
+ background:linear-gradient(135deg,var(--card2),var(--card));
+ border:1px solid var(--border);border-radius:20px;padding:16px;margin:15px 0;
+ display:flex;align-items:center;gap:15px;box-shadow:0 8px 20px rgba(0,0,0,0.1);
+ position:relative;isolation:isolate;overflow:hidden
+}
+.outfit-icon{font-size:42px;background:var(--card);padding:12px;border-radius:14px;border:1px solid var(--border)}
+.outfit-info h3{margin:0 0 5px;font-size:15px;color:var(--accent)}
+.outfit-info p{margin:0;font-size:12px;color:var(--muted);line-height:1.6}
+
+/* التصميم الأصلي */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 0 18px}
 .brand{font-size:27px;font-weight:900}
 .top-actions{display:flex;gap:8px}
@@ -339,8 +394,23 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
   <button class="primary" type="submit">بحث 🔎</button>
  </form>
 
- <!-- أزرار سريعة لكافة المحافظات والمدن المصرية -->
- <div class="quick-cities" id="quickCitiesBar"></div>
+ <!-- شريط المحافظات والمدن السريع + زرار خريطة المحافظات التفاعلي -->
+ <div class="quick-bar-wrapper">
+  <div class="quick-cities" id="quickCitiesBar"></div>
+  <button type="button" class="map-launcher-btn" id="openMapBtn">🗺️ خريطة وبحث المحافظات التفاعلي</button>
+ </div>
+
+ <!-- نافذة الخريطة التفاعلية (Modal) لاختيار المحافظات والبحث فيها -->
+ <div class="map-modal hidden" id="mapModal">
+  <div class="map-modal-content">
+   <div class="map-modal-header">
+    <h3>🌍 خريطة ومحدد المحافظات</h3>
+    <button type="button" class="close-modal" id="closeMapBtn">✕</button>
+   </div>
+   <input type="text" class="map-search-input" id="mapSearchInput" placeholder="ابحث داخل الخريطة عن محافظة أو مدينة...">
+   <div class="map-cities-grid" id="mapCitiesGrid"></div>
+  </div>
+ </div>
 
  <button class="location" id="locationButton">📍 استخدام موقعي الحالي</button>
 
@@ -368,6 +438,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
    <div class="description" id="description">جاري التحميل</div>
    <div class="feels" id="feels">المحسوسة: --°</div>
   </div>
+  
+  <!-- مساعد الملابس الذكي -->
+  <div class="outfit-card" id="outfitCard">
+   <div class="outfit-icon" id="outfitIcon">👔</div>
+   <div class="outfit-info">
+    <h3>مساعد الأزياء الذكي</h3>
+    <p id="outfitText">جاري تحليل درجات الحرارة لاقتراح الملابس المناسبة...</p>
+   </div>
+  </div>
+
   <div class="metrics">
    <div class="metric"><div class="metric-icon">💧</div><div class="metric-label">الرطوبة</div><div class="metric-value" id="humidity">--%</div></div>
    <div class="metric"><div class="metric-icon">💨</div><div class="metric-label">سرعة الرياح</div><div class="metric-value" id="wind">-- كم/س</div></div>
@@ -432,7 +512,7 @@ function setTheme(value){
 setTheme(theme);
 $("themeButton").addEventListener("click",()=>setTheme(theme==="dark"?"light":"dark"));
 
-/* ===== كافة المحافظات والمدن المصرية الـ 27 بالإضافة إلى المراكز الكبرى ===== */
+/* ===== كافة المحافظات والمدن المصرية الـ 27 والمراكز الكبرى ===== */
 const cities={
  "القاهرة":[30.0444,31.2357],
  "الجيزة":[30.0131,31.2089],
@@ -486,7 +566,7 @@ const cities={
  "العاصمة الإدارية":[30.0038,31.7094]
 };
 
-// إنشاء شريط الأزرار السريعة لجميع المحافظات تلقائياً
+// إنشاء شريط الأزرار السريعة أفقياً
 const quickBar = $("quickCitiesBar");
 Object.keys(cities).forEach(cityName => {
  const btn = document.createElement("button");
@@ -497,19 +577,44 @@ Object.keys(cities).forEach(cityName => {
  quickBar.appendChild(btn);
 });
 
+// تعبئة خريطة المدن داخل النافذة التفاعلية (Modal)
+const mapGrid = $("mapCitiesGrid");
+const renderMapGrid = (filter="") => {
+ mapGrid.innerHTML = "";
+ Object.keys(cities).forEach(cityName => {
+  if(filter && !cityName.includes(filter)) return;
+  const item = document.createElement("div");
+  item.className = "map-city-item";
+  item.textContent = cityName;
+  item.onclick = () => {
+   $("mapModal").classList.add("hidden");
+   loadWeather(cities[cityName][0], cities[cityName][1], cityName + "، مصر");
+  };
+  mapGrid.appendChild(item);
+ });
+};
+renderMapGrid();
+
+$("openMapBtn").addEventListener("click", () => $("mapModal").classList.remove("hidden"));
+$("closeMapBtn").addEventListener("click", () => $("mapModal").classList.add("hidden"));
+$("mapSearchInput").addEventListener("input", e => renderMapGrid(e.target.value.trim()));
+
+// إغلاق نافذة الخريطة عند النقر خارجها
+$("mapModal").addEventListener("click", e => {
+ if(e.target === $("mapModal")) $("mapModal").classList.add("hidden");
+});
+
 let isCelsius = true;
 let lastWeatherData = null;
 let audioCtx = null;
 let rainGainNode = null;
 let isSoundPlaying = false;
 
-/* ===== تشغيل/إيقاف صوت المطر فقط ===== */
+/* ===== تشغيل/إيقاف صوت المطر ===== */
 function startWeatherAudio(){
  if(!isSoundPlaying){
   try {
    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-   
-   // صوت المطر المستمر
    const bufferSize = audioCtx.sampleRate * 2;
    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
    const output = buffer.getChannelData(0);
@@ -575,7 +680,30 @@ function startLocalClock(timezoneOffsetSeconds = 0){
  clockInterval = setInterval(updateClock, 1000);
 }
 
-/* ===== محرك التأثيرات الجوية (سحب ومطر مستمر) ===== */
+/* ===== تحليل ملابس الطقس ===== */
+function updateOutfitAdvisor(temp, code){
+ const iconEl = $("outfitIcon");
+ const textEl = $("outfitText");
+ 
+ if([51,53,55,61,63,65,80,81,82,95,96,99].includes(code)){
+  iconEl.textContent = "☔";
+  textEl.textContent = "الجو ممطر! يُفضل ارتداء ملابس مقاومة للماء واصطحاب مظلة.";
+ } else if(temp < 15){
+  iconEl.textContent = "🧥";
+  textEl.textContent = "الجو بارد جداً! ارتدِ معطفاً ثقيلاً وملابس صوفية للحماية من البرد.";
+ } else if(temp >= 15 && temp < 22){
+  iconEl.textContent = "👔";
+  textEl.textContent = "الجو معتدل ومائل للبرودة، جاكيت خفيف أو قميص بأكمام طويلة مناسب جداً.";
+ } else if(temp >= 22 && temp < 30){
+  iconEl.textContent = "👕";
+  textEl.textContent = "الجو لطيف ومناسب للخروج، ملابس قطنية خفيفة ومريحة ستكون ممتازة.";
+ } else {
+  iconEl.textContent = "🧢";
+  textEl.textContent = "الجو حار! ارتدِ ملابس فاتحة وفضفاضة، ولا تنسَ النظارة الشمسية والقبعة.";
+ }
+}
+
+/* ===== التأثيرات الجوية ===== */
 function updateWeatherEffects(code,isDay=true){
  const layer=$("weatherEffects");
  layer.querySelectorAll('.effect-rain').forEach(el => el.remove());
@@ -660,6 +788,7 @@ function renderWeatherDetails(data){
  const info=weatherInfo(c.weather_code, c.is_day===1);
 
  updateWeatherEffects(c.weather_code, c.is_day===1);
+ updateOutfitAdvisor(c.temperature_2m, c.weather_code);
 
  $("cityName").textContent=currentPlace.name;
  $("updated").textContent="آخر تحديث: "+c.time.replace("T"," ");
