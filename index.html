@@ -33,43 +33,49 @@ button:focus-visible,input:focus-visible{
  outline:2px solid var(--blue);outline-offset:3px
 }
 
-/* ===== خلفية السماء المتحركة والقمر والنجوم ===== */
+/* ===== خلفية السماء والقمر والنجوم البارزة ===== */
 .sky-night-bg{
- position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;opacity:0;transition:opacity .6s ease;
+ position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+ opacity:1;transition:opacity .6s ease;
 }
-.night-active .sky-night-bg{opacity:1;}
 
 .sky-stars{
  position:absolute;inset:0;
  background-image: 
-  radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-  radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-  radial-gradient(1px 1px at 90px 40px, #ddd, rgba(0,0,0,0)),
-  radial-gradient(2px 2px at 160px 120px, #fff, rgba(0,0,0,0)),
-  radial-gradient(1.5px 1.5px at 230px 80px, #fff, rgba(0,0,0,0)),
-  radial-gradient(2px 2px at 300px 180px, #eee, rgba(0,0,0,0)),
-  radial-gradient(2px 2px at 350px 60px, #fff, rgba(0,0,0,0));
+  radial-gradient(2.5px 2.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+  radial-gradient(3px 3px at 50px 100px, #fffae0, rgba(0,0,0,0)),
+  radial-gradient(2px 2px at 120px 40px, #ffffff, rgba(0,0,0,0)),
+  radial-gradient(3.5px 3.5px at 200px 150px, #fff8cb, rgba(0,0,0,0)),
+  radial-gradient(2px 2px at 280px 70px, #ffffff, rgba(0,0,0,0)),
+  radial-gradient(3px 3px at 340px 190px, #ffffff, rgba(0,0,0,0)),
+  radial-gradient(2.5px 2.5px at 420px 90px, #fff5be, rgba(0,0,0,0));
  background-repeat:repeat;
- background-size: 400px 400px;
- animation: starsTwinkle 6s ease-in-out infinite alternate;
- opacity:.75;
+ background-size: 450px 450px;
+ animation: starsTwinkle 4s ease-in-out infinite alternate;
+ opacity:.9;
 }
 @keyframes starsTwinkle{
- from{opacity:.5;transform:scale(1);}
- to{opacity:.9;transform:scale(1.02);}
+ 0%{opacity:.6;transform:scale(0.98);}
+ 100%{opacity:1;transform:scale(1.02);}
 }
 
 .sky-moon{
- position:absolute;top:60px;left:70px;
- width:75px;height:75px;border-radius:50%;
- background:radial-gradient(circle at 30% 30%, #fffdf4 0%, #f4e8b1 40%, #d8c373 100%);
- box-shadow:0 0 35px rgba(244,232,177,0.4), inset -8px -6px 0px rgba(185,160,80,0.3);
- animation:moonFloat 8s ease-in-out infinite;
+ position:absolute;top:35px;right:40px;
+ width:110px;height:110px;border-radius:50%;
+ background:radial-gradient(circle at 35% 35%, #ffffff 0%, #fff4c2 30%, #ecd06b 70%, #c9a433 100%);
+ box-shadow:0 0 50px rgba(255,230,130,0.6), 0 0 100px rgba(255,215,80,0.3), inset -12px -10px 0px rgba(160,125,25,0.35);
+ animation:moonFloat 7s ease-in-out infinite alternate;
  z-index:0;
 }
+/* تفاصيل التضاريس البسيطة على سطح القمر ليعطي شكل واقعي */
+.sky-moon::before{
+ content:"";position:absolute;top:22px;left:25px;width:22px;height:22px;
+ border-radius:50%;background:rgba(180,145,40,0.18);box-shadow:25px 30px 0 -3px rgba(180,145,40,0.15), 10px 45px 0 -5px rgba(180,145,40,0.2);
+}
+
 @keyframes moonFloat{
- 0%,100%{transform:translateY(0) rotate(-5deg);}
- 50%{transform:translateY(10px) rotate(2deg);}
+ 0%{transform:translateY(0) rotate(-3deg);}
+ 100%{transform:translateY(12px) rotate(3deg);}
 }
 
 /* ===== طبقة التأثيرات الجوية الجديدة ===== */
@@ -370,13 +376,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  .project-box strong{font-size:11px}
  .search .primary{padding:12px}
  .forecast-row{gap:6px;font-size:11px}
+ .sky-moon{width:80px;height:80px;top:20px;right:15px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- طبقة خلفية السماء والنجوم والقمر المتحركة -->
+<!-- طبقة خلفية السماء والنجوم والقمر المتحركة والبارزة -->
 <div class="sky-night-bg" id="skyNightBg" aria-hidden="true">
  <div class="sky-stars"></div>
  <div class="sky-moon"></div>
@@ -485,18 +492,10 @@ function setTheme(value){
 setTheme(theme);
 $("themeButton").addEventListener("click",()=>setTheme(theme==="dark"?"light":"dark"));
 
-/* ===== محرك التأثيرات الجوية الخلفية والقمر ===== */
+/* ===== محرك التأثيرات الجوية والطقس ===== */
 function updateWeatherEffects(code,isDay=true){
  const layer=$("weatherEffects");
- const nightBg=$("skyNightBg");
  layer.replaceChildren();
-
- // تفعيل أو إيقاف خلفية السماء الليلية والقمر والنجوم حسب وقت النهار وحالة الطقس
- if(!isDay && code === 0){
-  document.body.classList.add("night-active");
- } else {
-  document.body.classList.remove("night-active");
- }
 
  const addEffect=(className,styles={})=>{
   const el=document.createElement("div");
@@ -656,7 +655,7 @@ async function loadWeather(lat,lon,name){
   const c=data.current,d=data.daily,h=data.hourly;
   const info=weatherInfo(c.weather_code,c.is_day===1);
 
-  // تحديث التأثيرات والخلفية طبقًا لحالة الطقس الحقيقية
+  // تحديث التأثيرات طبقًا لحالة الطقس الحقيقية
   updateWeatherEffects(c.weather_code,c.is_day===1);
 
   $("cityName").textContent=name;
