@@ -687,4 +687,414 @@ function updateOutfitAdvisor(temp, code){
  const iconEl = $("outfitIcon");
  const textEl = $("outfitText");
  
- if([71,73,75,77,85,86].includes
+ if([71,73,75,77,85,86].includes(code) || temp < 10){
+  iconEl.textContent = "🧥";
+  textEl.textContent = "الجو بارد جداً وهناك تساقط للثلوج! ارتدِ معطفاً ثقيلاً جداً وملابس دافئة.";
+ } else if(temp >= 10 && temp < 18){
+  iconEl.textContent = "🧥";
+  textEl.textContent = "الجو بارد، ارتدِ معطفاً أو ملابس صوفية ثقيلة للحماية من البرد.";
+ } else if(temp >= 18 && temp < 22){
+  iconEl.textContent = "👔";
+  textEl.textContent = "الجو معتدل ومائل للبرودة، جاكيت خفيف أو قميص بأكمام طويلة مناسب جداً.";
+ } else if(temp >= 22 && temp < 30){
+  iconEl.textContent = "👕";
+  textEl.textContent = "الجو لطيف ومناسب للخروج، ملابس قطنية خفيفة ومريحة ستكون ممتازة.";
+ } else {
+  iconEl.textContent = "🧢";
+  textEl.textContent = "الجو حار! ارتدِ ملابس فاتحة وفضفاضة، ولا تنسَ النظارة الشمسية والقبعة.";
+ }
+}
+
+/* ===== تأثير تساقط الثلج الخفيف ===== */
+function updateWeatherEffects(){
+ const layer = $("weatherEffects");
+ layer.querySelectorAll('.effect-snow').forEach(el => el.remove());
+
+ for(let i = 0; i < 30; i++){
+  const flake = document.createElement("div");
+  flake.className = "effect effect-snow";
+  
+  const size = (Math.random() * 4 + 3) + "px";
+  flake.style.width = size;
+  flake.style.height = size;
+  
+  flake.style.left = (Math.random() * 100) + "%";
+  flake.style.animationDuration = (4 + Math.random() * 5) + "s";
+  flake.style.animationDelay = (-Math.random() * 5) + "s";
+  flake.style.opacity = String(0.4 + Math.random() * 0.5);
+  
+  layer.appendChild(flake);
+ }
+}
+
+const dayNames=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+const monthNames=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+let currentPlace={lat:30.0444,lon:31.2357,name:"القاهرة، مصر"};
+let requestId=0;
+
+function setStatus(message,error=false){
+ $("status").textContent=message;
+ $("status").style.color=error?"#ff7777":"";
+}
+
+function weatherInfo(code,isDay=true){
+ if(code===0)return {text:"سماء صافية",icon:isDay?"☀️":"🌙"};
+ if([1,2].includes(code))return {text:"غائم جزئيًا",icon:isDay?"🌤️":"☁️"};
+ if(code===3)return {text:"غائم",icon:"☁️"};
+ if([45,48].includes(code))return {text:"ضباب",icon:"🌫️"};
+ if([51,53,55,56,57].includes(code))return {text:"رذاذ خفيف",icon:"🌨️"};
+ if([61,63,65,66,67,80,81,82].includes(code))return {text:"أجواء باردة",icon:"🌨️"};
+ if([71,73,75,77,85,86].includes(code))return {text:"تساقط ثلوج",icon:"❄️"};
+ if([95,96,99].includes(code))return {text:"عواصف ثلجية/رعدية",icon:"❄️"};
+ return {text:"حالة الطقس",icon:"❄️"};
+}
+
+function localDate(date){
+ const parts=date.split("-");
+ return new Date(+parts[0],+parts[1]-1,+parts[2]);
+}
+
+async function loadWeather(lat,lon,name){
+ const id=++requestId;
+ currentPlace={lat,lon,name};
+ setStatus("⏳ جاري تحديث الطقس...");
+ $("hourly").textContent="جاري تحميل التوقعات...";
+ $("forecast").textContent="جاري تحميل التوقعات...";
+ $("chart").innerHTML="";
+ $("airContent").innerHTML='<div class="status">جاري تحميل جودة الهواء...</div>';
+
+ const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+
+ "&longitude="+lon+
+ "&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m"+
+ "&hourly=temperature_2m,weather_code"+
+ "&daily=weather_code,temperature_2m_max,temperature_2m_min"+
+ "&timezone=auto&forecast_days=5";
+
+ try{
+  const response=await fetch(url);
+  if(!response.ok)throw Error("weather");
+  const data=await response.json();
+  if(id!==requestId)return;
+  
+  lastWeatherData = data;
+  renderWeatherDetails(data);
+  startLocalClock(data.utc_offset_seconds || 0);
+
+  setStatus("✅ تم تحديث بيانات الطقس");
+  loadAirQuality(lat,lon,id);
+ }catch(e){
+  if(id!==requestId)return;
+  setStatus("تعذر تحميل الطقس. تأكد من اتصال الإنترنت وحاول مرة أخرى.",true);
+  $("hourly").textContent="تعذر تحميل التوقعات.";
+  $("forecast").textContent="تعذر تحميل التوقعات.";
+  $("airContent").innerHTML='<div class="status">بيانات جودة الهواء غير متاحة حاليًا.</div>';
+ }
+}
+
+function renderWeatherDetails(data){
+ const c=data.current, d=data.daily, h=data.hourly;
+ const info=weatherInfo(c.weather_code, c.is_day===1);
+
+ updateWeatherEffects();
+ updateOutfitAdvisor(c.temperature_2m, c.weather_code);
+
+ $("cityName").textContent=currentPlace.name;
+ $("updated").textContent="آخر تحديث: "+c.time.replace("T"," ");
+ $("weatherIcon").textContent=info.icon;
+ $("temperature").innerHTML=convertTemp(c.temperature_2m)+'<small>°</small>';
+ $("description").textContent=info.text;
+ $("feels").textContent="درجة الحرارة المحسوسة: "+convertTemp(c.apparent_temperature);
+ $("humidity").textContent=c.relative_humidity_2m+"%";
+ $("wind").textContent=Math.round(c.wind_speed_10m)+" كم/س";
+ $("maxTemp").textContent=convertTemp(d.temperature_2m_max[0]);
+ $("minTemp").textContent=convertTemp(d.temperature_2m_min[0]);
+
+ renderHourly(h,c.time);
+ renderForecast(d);
+ renderChart(d);
+}
+
+function renderHourly(h,currentTime){
+ $("hourly").innerHTML="";
+ let start=h.time.findIndex(t=>t.slice(0,13)===currentTime.slice(0,13));
+ if(start<0)start=0;
+
+ for(let i=start;i<Math.min(start+24,h.time.length);i++){
+  const hour=document.createElement("div");
+  hour.className="hour";
+  const time=document.createElement("div");
+  time.className="hour-time";
+  time.textContent=i===start?"الآن":h.time[i].slice(11,16);
+  const icon=document.createElement("div");
+  icon.className="hour-icon";
+  const hr=Number(h.time[i].slice(11,13));
+  icon.textContent=weatherInfo(h.weather_code[i],hr>=6&&hr<18).icon;
+  const temp=document.createElement("div");
+  temp.className="hour-temp";
+  temp.textContent=convertTemp(h.temperature_2m[i]);
+  hour.append(time,icon,temp);
+  $("hourly").appendChild(hour);
+ }
+}
+
+function renderForecast(d){
+ $("forecast").innerHTML="";
+ $("listView").innerHTML="";
+
+ d.time.forEach((date,i)=>{
+  const dt=localDate(date),info=weatherInfo(d.weather_code[i]);
+  const day=document.createElement("div");
+  day.className="day";
+
+  const name=document.createElement("div");
+  name.className="day-name";
+  name.textContent=i===0?"اليوم":dayNames[dt.getDay()];
+
+  const dateEl=document.createElement("div");
+  dateEl.className="day-date";
+  dateEl.textContent=dt.getDate()+" "+monthNames[dt.getMonth()];
+
+  const desc=document.createElement("div");
+  desc.className="day-desc";
+  desc.textContent=info.text;
+
+  const icon=document.createElement("div");
+  icon.className="day-icon";
+  icon.textContent=info.icon;
+
+  const high=document.createElement("div");
+  high.className="day-high";
+  high.textContent=convertTemp(d.temperature_2m_max[i]);
+
+  const low=document.createElement("div");
+  low.className="day-low";
+  low.textContent=convertTemp(d.temperature_2m_min[i]);
+
+  day.append(name,dateEl,desc,icon,high,low);
+  $("forecast").appendChild(day);
+
+  const row=document.createElement("div");
+  row.className="forecast-row";
+  const rowDay=document.createElement("strong");
+  rowDay.textContent=name.textContent+" "+dt.getDate()+" "+monthNames[dt.getMonth()];
+  const rowIcon=document.createElement("span");
+  rowIcon.className="row-icon";
+  rowIcon.textContent=info.icon;
+  const rowDesc=document.createElement("span");
+  rowDesc.className="row-desc";
+  rowDesc.textContent=info.text;
+  const temps=document.createElement("span");
+  temps.className="row-temps";
+  temps.textContent=convertTemp(d.temperature_2m_max[i])+" / "+convertTemp(d.temperature_2m_min[i]);
+  row.append(rowDay,rowIcon,rowDesc,temps);
+  $("listView").appendChild(row);
+ });
+}
+
+function renderChart(d){
+ const svg=$("chart"),W=600,H=180,left=40,right=20,top=24,bottom=25;
+ const maxs=d.temperature_2m_max.map(Number);
+ const mins=d.temperature_2m_min.map(Number);
+ const max=Math.max(...maxs,...mins)+3;
+ const min=Math.min(...maxs,...mins)-3;
+ const x=i=>left+i*(W-left-right)/(d.time.length-1);
+ const y=v=>top+(max-v)*(H-top-bottom)/(max-min);
+ const points=values=>values.map((v,i)=>x(i)+","+y(v)).join(" ");
+ let html='<polyline class="chart-line" points="'+points(maxs)+'"/>';
+ html+='<polyline class="chart-line chart-low" points="'+points(mins)+'"/>';
+ maxs.forEach((v,i)=>{
+  html+='<circle class="chart-dot" cx="'+x(i)+'" cy="'+y(v)+'" r="6"/>';
+  html+='<text x="'+x(i)+'" y="'+(y(v)-13)+'" text-anchor="middle">'+convertTemp(v)+'</text>';
+  html+='<circle class="chart-dot" cx="'+x(i)+'" cy="'+y(mins[i])+'" r="5"/>';
+  html+='<text x="'+x(i)+'" y="'+(y(mins[i])+23)+'" text-anchor="middle">'+convertTemp(mins[i])+'</text>';
+ });
+ svg.innerHTML=html;
+}
+
+$("lineButton").addEventListener("click",()=>{
+ $("lineView").classList.remove("hidden");
+ $("listView").classList.add("hidden");
+ $("lineButton").classList.add("active");
+ $("listButton").classList.remove("active");
+});
+$("listButton").addEventListener("click",()=>{
+ $("lineView").classList.add("hidden");
+ $("listView").classList.remove("hidden");
+ $("listButton").classList.add("active");
+ $("lineButton").classList.remove("active");
+});
+
+async function loadAirQuality(lat,lon,id){
+ const url="https://air-quality-api.open-meteo.com/v1/air-quality?latitude="+lat+
+ "&longitude="+lon+"&current=us_aqi,european_aqi,pm2_5,pm10&timezone=auto";
+ try{
+  const response=await fetch(url);
+  if(!response.ok)throw Error("air");
+  const data=await response.json();
+  if(id!==requestId)return;
+  const c=data.current,aqi=c.us_aqi;
+  if(aqi===null||aqi===undefined)throw Error("no aqi");
+
+  let label,description;
+  if(aqi<=50){label="جيدة";description="جودة الهواء جيدة، والتلوث قليل عادةً."}
+  else if(aqi<=100){label="متوسطة";description="قد يتأثر بعض الأشخاص الأكثر حساسية."}
+  else if(aqi<=150){label="غير صحية للفئات الحساسة";description="يُفضّل تقليل المجهود الخارجي للفئات الحساسة."}
+  else if(aqi<=200){label="غير صحية";description="يُنصح بتقليل الأنشطة الخارجية الطويلة."}
+  else if(aqi<=300){label="سيئة جدًا";description="يُنصح بتجنب المجهود الخارجي قدر الإمكان."}
+  else{label="خطيرة";description="التلوث مرتفع جدًا؛ قلل التعرض للهواء الخارجي."}
+
+  const pct=Math.max(0,Math.min(100,aqi/300*100));
+  $("airContent").innerHTML=
+   '<div class="aqi-number">'+Math.round(aqi)+' <span class="aqi-label">'+label+'</span></div>'+
+   '<div class="aqi-description">'+description+'</div>'+
+   '<div class="aqi-bar"><span class="aqi-marker" style="left:'+pct+'%"></span></div>'+
+   '<div class="aqi-scale"><span>جيدة</span><span>متوسطة</span><span>مرتفعة</span><span>خطيرة</span></div>'+
+   '<div class="air-details">'+
+   '<div class="air-item"><span>الجسيمات الدقيقة PM2.5</span><strong>'+(c.pm2_5==null?"غير متاح":Number(c.pm2_5).toFixed(1)+" µg/m³")+'</strong></div>'+
+   '<div class="air-item"><span>الجسيمات PM10</span><strong>'+(c.pm10==null?"غير متاح":Number(c.pm10).toFixed(1)+" µg/m³")+'</strong></div>'+
+   '<div class="air-item"><span>المؤشر الأمريكي AQI</span><strong>'+Math.round(aqi)+'</strong></div>'+
+   '<div class="air-item"><span>المؤشر الأوروبي AQI</span><strong>'+(c.european_aqi==null?"غير متاح":Math.round(c.european_aqi))+'</strong></div>'+
+   '</div><div class="muted" style="margin-top:14px">المصدر: Open-Meteo Air Quality</div>';
+ }catch(e){
+  if(id!==requestId)return;
+  $("airContent").innerHTML='<div class="status">تعذر الحصول على بيانات جودة الهواء حاليًا. الطقس يعمل بشكل مستقل.</div>';
+ }
+}
+
+/* ===== مميزات البحث الذكي والمفضلة الجديدة ===== */
+const cityNamesList = Object.keys(cities);
+const cityInput = $("cityInput");
+const suggestionsList = $("suggestionsList");
+
+cityInput.addEventListener("input", function() {
+ const query = this.value.trim().toLowerCase();
+ suggestionsList.innerHTML = "";
+ 
+ if (!query) {
+  suggestionsList.style.display = "none";
+  return;
+ }
+
+ const matches = cityNamesList.filter(c => c.toLowerCase().includes(query));
+ 
+ if (matches.length > 0) {
+  suggestionsList.style.display = "block";
+  matches.forEach(cityName => {
+   const li = document.createElement("li");
+   li.textContent = cityName;
+   li.onclick = () => {
+    cityInput.value = cityName;
+    suggestionsList.style.display = "none";
+    loadWeather(cities[cityName][0], cities[cityName][1], cityName + "، مصر");
+   };
+   suggestionsList.appendChild(li);
+  });
+ } else {
+  suggestionsList.style.display = "none";
+ }
+});
+
+document.addEventListener("click", function(e) {
+ if (!e.target.closest("#searchForm")) {
+  suggestionsList.style.display = "none";
+ }
+});
+
+const saveFavBtn = $("saveFavBtn");
+const favoritesChipsContainer = $("favoritesChipsContainer");
+
+function getFavorites() {
+ try {
+  return JSON.parse(localStorage.getItem("taqsi-favorites")) || [];
+ } catch(e) {
+  return [];
+ }
+}
+
+function renderFavorites() {
+ const favs = getFavorites();
+ favoritesChipsContainer.innerHTML = "";
+ 
+ favs.forEach(cityName => {
+  const chip = document.createElement("div");
+  chip.className = "fav-chip";
+  chip.innerHTML = `⭐ ${cityName}`;
+  chip.onclick = () => {
+   if (cities[cityName]) {
+    loadWeather(cities[cityName][0], cities[cityName][1], cityName + "، مصر");
+   }
+  };
+  favoritesChipsContainer.appendChild(chip);
+ });
+}
+
+saveFavBtn.addEventListener("click", () => {
+ let cleanName = currentPlace.name.split("،")[0].trim();
+ let favs = getFavorites();
+ 
+ if (!favs.includes(cleanName)) {
+  favs.push(cleanName);
+  localStorage.setItem("taqsi-favorites", JSON.stringify(favs));
+  renderFavorites();
+  alert(`تم حفظ مدينة "${cleanName}" في المفضلة بنجاح! ⭐`);
+ } else {
+  alert(`مدينة "${cleanName}" موجودة بالفعل في قائمة المفضلة.`);
+ }
+});
+
+renderFavorites();
+
+$("searchForm").addEventListener("submit", async e=>{
+ e.preventDefault();
+ const query=$("cityInput").value.trim();
+ if(query.length<2){setStatus("اكتب اسم مدينة أو دولة أولًا.",true);return;}
+ const normalized=query.replace(/\s+/g," ").toLocaleLowerCase("ar");
+ const local=Object.keys(cities).find(k=>k.toLocaleLowerCase("ar")===normalized);
+ if(local){loadWeather(cities[local][0],cities[local][1],local+"، مصر");return;}
+
+ setStatus("🔎 جاري البحث عن المكان...");
+ try{
+  const url="https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(query)+"&count=10&language=ar&format=json";
+  const response=await fetch(url);
+  if(!response.ok)throw Error("geo");
+  const result=await response.json();
+  if(!result.results?.length){
+   setStatus("لم نعثر على المكان. جرّب الاسم بالإنجليزية أو أضف الدولة.",true);
+   return;
+  }
+  const locations=result.results;
+  const exact=locations.find(p=>p.name.toLocaleLowerCase()===query.toLocaleLowerCase());
+  const place=exact||locations[0];
+  const parts=[place.name,place.admin1,place.country].filter(Boolean);
+  loadWeather(place.latitude,place.longitude,[...new Set(parts)].join("، "));
+ }catch(e){
+  setStatus("تعذر البحث. تأكد من الإنترنت وحاول مرة أخرى.",true);
+ }
+});
+
+$("locationButton").addEventListener("click",()=>{
+ if(!navigator.geolocation){setStatus("المتصفح لا يدعم تحديد الموقع.",true);return;}
+ setStatus("📍 جاري تحديد موقعك...");
+ navigator.geolocation.getCurrentPosition(
+  p=>loadWeather(p.coords.latitude,p.coords.longitude,"موقعك الحالي"),
+  ()=>setStatus("لم نتمكن من تحديد موقعك. اسمح للمتصفح باستخدام الموقع.",true),
+  {enableHighAccuracy:false,timeout:15000}
+ );
+});
+
+$("refreshButton").addEventListener("click",()=>{
+ loadWeather(currentPlace.lat,currentPlace.lon,currentPlace.name);
+});
+
+// تشغيل التحميل التلقائي فور فتح الصفحة
+loadWeather(30.0444,31.2357,"القاهرة، مصر");
+
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("/taqsi-weather/service-worker.js")
+   .catch(e=>console.log("Service Worker غير متاح:",e));
+ });
+}
+</script>
+</body>
+</html>
