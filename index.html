@@ -362,6 +362,40 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  .search .primary{padding:12px}
  .forecast-row{gap:6px;font-size:11px}
 }
+
+/* ستايل إضافي لقائمة الاقتراحات وزر المفضلة */
+#suggestionsList {
+ position: absolute; top: 100%; right: 0; left: 0;
+ background: var(--card); border: 1px solid var(--border);
+ border-radius: 12px; list-style: none; padding: 5px 0; margin-top: 5px;
+ max-height: 180px; overflow-y: auto; z-index: 1000;
+ box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: none;
+}
+#suggestionsList li {
+ padding: 10px 15px; cursor: pointer; font-size: 13px; color: var(--text);
+ transition: 0.2s;
+}
+#suggestionsList li:hover {
+ background: var(--blue); color: #fff;
+}
+.fav-action-bar {
+ display: flex; gap: 8px; margin-bottom: 10px;
+}
+.fav-btn-action {
+ background: var(--card2); border: 1px solid var(--border); color: var(--accent);
+ padding: 10px 15px; border-radius: 14px; font-size: 13px; font-weight: bold;
+ cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+}
+.fav-btn-action:hover { background: var(--accent); color: #000; }
+#favoritesChipsContainer {
+ display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.fav-chip {
+ background: var(--card2); border: 1px solid var(--border); color: var(--text);
+ padding: 5px 12px; border-radius: 20px; font-size: 11px; cursor: pointer;
+ transition: 0.2s; display: inline-flex; align-items: center; gap: 5px;
+}
+.fav-chip:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
 </style>
 </head>
 
@@ -389,10 +423,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
   <div class="project-box">رقم المشروع 166<strong>إشراف الدكتور رشدي فاروق</strong></div>
  </div>
 
- <form class="search" id="searchForm">
-  <input id="cityInput" placeholder="ابحث عن مدينة أو محافظة..." aria-label="ابحث عن مدينة">
+ <form class="search" id="searchForm" style="position: relative;">
+  <input id="cityInput" placeholder="ابحث عن مدينة أو محافظة..." aria-label="ابحث عن مدينة" autocomplete="off">
   <button class="primary" type="submit">بحث 🔎</button>
+  <!-- قائمة الاقتراحات الذكية -->
+  <ul id="suggestionsList"></ul>
  </form>
+
+ <!-- أزرار المدن المفضلة المحفوظة -->
+ <div class="fav-action-bar">
+  <button type="button" class="fav-btn-action" id="saveFavBtn">⭐ حفظ المدينة الحالية للمفضلة</button>
+ </div>
+ <div id="favoritesChipsContainer"></div>
 
  <!-- شريط المحافظات والمدن السريع + زرار خريطة المحافظات التفاعلي -->
  <div class="quick-bar-wrapper">
@@ -953,7 +995,96 @@ async function loadAirQuality(lat,lon,id){
  }
 }
 
-$("searchForm").addEventListener("submit",async e=>{
+/* ===== مميزات البحث الذكي والمفضلة الجديدة ===== */
+
+// 1. نظام الاقتراحات الذكية أثناء الكتابة
+const cityNamesList = Object.keys(cities);
+const cityInput = $("cityInput");
+const suggestionsList = $("suggestionsList");
+
+cityInput.addEventListener("input", function() {
+ const query = this.value.trim().toLowerCase();
+ suggestionsList.innerHTML = "";
+ 
+ if (!query) {
+  suggestionsList.style.display = "none";
+  return;
+ }
+
+ const matches = cityNamesList.filter(c => c.toLowerCase().includes(query));
+ 
+ if (matches.length > 0) {
+  suggestionsList.style.display = "block";
+  matches.forEach(cityName => {
+   const li = document.createElement("li");
+   li.textContent = cityName;
+   li.onclick = () => {
+    cityInput.value = cityName;
+    suggestionsList.style.display = "none";
+    loadWeather(cities[cityName][0], cities[cityName][1], cityName + "، مصر");
+   };
+   suggestionsList.appendChild(li);
+  });
+ } else {
+  suggestionsList.style.display = "none";
+ }
+});
+
+// إخفاء قائمة الاقتراحات عند النقر خارجها
+document.addEventListener("click", function(e) {
+ if (!e.target.closest("#searchForm")) {
+  suggestionsList.style.display = "none";
+ }
+});
+
+// 2. نظام حفظ وتخزين المدن المفضلة (localStorage)
+const saveFavBtn = $("saveFavBtn");
+const favoritesChipsContainer = $("favoritesChipsContainer");
+
+function getFavorites() {
+ try {
+  return JSON.parse(localStorage.getItem("taqsi-favorites")) || [];
+ } catch(e) {
+  return [];
+ }
+}
+
+function renderFavorites() {
+ const favs = getFavorites();
+ favoritesChipsContainer.innerHTML = "";
+ 
+ favs.forEach(cityName => {
+  const chip = document.createElement("div");
+  chip.className = "fav-chip";
+  chip.innerHTML = `⭐ ${cityName}`;
+  chip.onclick = () => {
+   if (cities[cityName]) {
+    loadWeather(cities[cityName][0], cities[cityName][1], cityName + "، مصر");
+   }
+  };
+  favoritesChipsContainer.appendChild(chip);
+ });
+}
+
+saveFavBtn.addEventListener("click", () => {
+ // استخراج اسم المدينة الحالي بدون ", مصر"
+ let cleanName = currentPlace.name.split("،")[0].trim();
+ let favs = getFavorites();
+ 
+ if (!favs.includes(cleanName)) {
+  favs.push(cleanName);
+  localStorage.setItem("taqsi-favorites", JSON.stringify(favs));
+  renderFavorites();
+  alert(`تم حفظ مدينة "${cleanName}" في المفضلة بنجاح! ⭐`);
+ } else {
+  alert(`مدينة "${cleanName}" موجودة بالفعل في قائمة المفضلة.`);
+ }
+});
+
+// تحميل المفضلة أول ما الصفحة تفتح
+renderFavorites();
+
+$("searchForm").addEventListener("submit", async e=>{
  e.preventDefault();
  const query=$("cityInput").value.trim();
  if(query.length<2){setStatus("اكتب اسم مدينة أو دولة أولًا.",true);return;}
