@@ -33,7 +33,7 @@ button:focus-visible,input:focus-visible{
  outline:2px solid var(--blue);outline-offset:3px
 }
 
-/* ===== طبقة التأثيرات الجوية ===== */
+/* ===== طبقة التأثيرات الجوية (سحب، مطر، برق كل 5 ثواني) ===== */
 #weatherEffects{
  position:fixed;inset:0;overflow:hidden;
  pointer-events:none;z-index:0;
@@ -45,7 +45,7 @@ button:focus-visible,input:focus-visible{
 }
 .app{max-width:720px;margin:auto;padding:16px 15px 28px;position:relative;z-index:1}
 
-/* السحب المتحركة */
+/* السحب المتحركة في الخلفية */
 .effect-cloud{
  width:180px;height:55px;border-radius:50px;
  background:linear-gradient(180deg,rgba(217,232,255,0.45),rgba(135,156,206,0.25));
@@ -68,25 +68,22 @@ button:focus-visible,input:focus-visible{
  to{transform:translateX(80px)}
 }
 
-/* ثلج خفيف */
-.effect-snow{
- top:-15px;
- background: #ffffff;
- border-radius: 50%;
- opacity: 0.8;
- filter: blur(0.5px);
- box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
- animation: snowFall linear infinite;
+/* قطرات المطر الواضحة والغزيرة */
+.effect-rain{
+ top:-35px;width:2px;height:22px;border-radius:5px;
+ background:linear-gradient(transparent,rgba(182,223,255,0.85));
+ box-shadow:0 0 6px rgba(118,186,255,0.4);
+ animation:rainFall 0.8s linear infinite;
  z-index:0;
 }
-@keyframes snowFall{
- 0%{ transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 0; }
- 10%{ opacity: 0.8; }
- 90%{ opacity: 0.5; }
- 100%{ transform: translate3d(30px, 105vh, 0) rotate(360deg); opacity: 0; }
+@keyframes rainFall{
+ 0%{transform:translate3d(0,-5vh,0);opacity:0}
+ 10%{opacity:.8}
+ 90%{opacity:.6}
+ 100%{transform:translate3d(-20px,105vh,0);opacity:0}
 }
 
-/* ومضات البرق */
+/* ومضات البرق (تتكرر تماماً كل 5 ثواني) */
 #lightningFlash{
  position:fixed;inset:0;
  background:rgba(230,240,255,0.75);
@@ -102,7 +99,12 @@ button:focus-visible,input:focus-visible{
  97% { opacity: 0.7; }
 }
 
-/* شريط المحافظات والمدن */
+@media(prefers-reduced-motion:reduce){
+ #weatherEffects .effect,#lightningFlash{animation:none!important}
+ #weatherEffects{opacity:.22}
+}
+
+/* ===== شريط المحافظات والمدن السريع ===== */
 .quick-bar-wrapper{
  display:flex;flex-direction:column;gap:8px;margin-bottom:10px;
 }
@@ -117,7 +119,7 @@ button:focus-visible,input:focus-visible{
 }
 .city-pill:hover,.city-pill.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 
-/* زر الخريطة */
+/* زرار الخريطة الجديد */
 .map-launcher-btn{
  width:100%;background:linear-gradient(135deg, #1d3557, #111c43);
  border:1px solid var(--blue);color:var(--text);padding:10px;border-radius:14px;
@@ -126,7 +128,7 @@ button:focus-visible,input:focus-visible{
 }
 .map-launcher-btn:hover{background:var(--blue);color:#fff}
 
-/* نافذة الخريطة التفاعلية */
+/* نافذة الخريطة التفاعلية (Modal) */
 .map-modal{
  position:fixed;inset:0;background:rgba(4,8,20,0.85);z-index:100;
  display:flex;align-items:center;justify-content:center;padding:15px;
@@ -164,10 +166,11 @@ button:focus-visible,input:focus-visible{
  font-size:12px;color:var(--muted)
 }
 .local-clock{font-weight:bold;color:var(--text)}
-.unit-btn{
+.sound-btn,.unit-btn{
  background:var(--card);border:1px solid var(--border);color:var(--text);
  padding:5px 10px;border-radius:10px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px
 }
+.sound-btn.active{background:var(--green);color:#000;font-weight:bold;border-color:var(--green)}
 
 /* مساعد الملابس الذكي */
 .outfit-card{
@@ -180,7 +183,7 @@ button:focus-visible,input:focus-visible{
 .outfit-info h3{margin:0 0 5px;font-size:15px;color:var(--accent)}
 .outfit-info p{margin:0;font-size:12px;color:var(--muted);line-height:1.6}
 
-/* عناصر الصفحة */
+/* التصميم الأصلي */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 0 18px}
 .brand{font-size:27px;font-weight:900}
 .top-actions{display:flex;gap:8px}
@@ -200,7 +203,15 @@ button:focus-visible,input:focus-visible{
  flex:1;min-width:0
 }
 .project-box strong{display:block;color:#fff;font-size:12px;font-weight:900}
-
+.project-box::before{
+ content:"";position:absolute;inset:0;padding:2px;border-radius:inherit;
+ background:conic-gradient(from var(--gold-angle),
+ transparent 0deg,transparent 275deg,#bba46d 300deg,
+ #fff0bd 320deg,#bba46d 335deg,transparent 360deg);
+ -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ pointer-events:none;z-index:5;animation:goldTravel 4s linear infinite
+}
 .search{
  display:flex;gap:8px;margin-bottom:10px;position:relative;
  isolation:isolate;border-radius:16px;padding:2px
@@ -308,6 +319,34 @@ body.light .toggle button.active{background:#dce6ff;color:#17346d}
 .air-item strong{font-size:16px}
 footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;padding:22px 0}
 
+@property --neon-angle{syntax:"<angle>";initial-value:0deg;inherits:false}
+@property --gold-angle{syntax:"<angle>";initial-value:0deg;inherits:false}
+
+.card::before,.metric::before,.day::before,.location::before,
+.small-btn::before,.primary::before,.search::before,.toggle::before,.air-item::before{
+ content:"";position:absolute;inset:0;padding:2px;border-radius:inherit;
+ background:conic-gradient(from var(--neon-angle),
+ transparent 0deg,transparent 250deg,
+ #4778ff 285deg,#35e8ff 315deg,#fff 325deg,
+ #35e8ff 338deg,transparent 360deg);
+ -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ pointer-events:none;z-index:5;animation:neonTravel 3s linear infinite
+}
+.search::before{pointer-events:none}
+.primary{overflow:hidden}
+.primary::before{z-index:-1}
+.small-btn{position:relative;isolation:isolate;overflow:hidden}
+.hour{position:relative;isolation:isolate}
+.hour::after{content:"";position:absolute;inset:-5px;border:1px solid transparent;border-radius:12px;pointer-events:none}
+@keyframes neonTravel{to{--neon-angle:360deg}}
+@keyframes goldTravel{to{--gold-angle:360deg}}
+
+@media(prefers-reduced-motion:reduce){
+ .card::before,.metric::before,.day::before,.location::before,
+ .small-btn::before,.primary::before,.search::before,.toggle::before,
+ .air-item::before,.project-box::before{animation:none}
+}
 @media(max-width:430px){
  .app{padding:12px}
  .card{padding:15px;border-radius:21px}
@@ -323,46 +362,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  .search .primary{padding:12px}
  .forecast-row{gap:6px;font-size:11px}
 }
-
-/* قائمة الاقتراحات والمفضلة */
-#suggestionsList {
- position: absolute; top: 100%; right: 0; left: 0;
- background: var(--card); border: 1px solid var(--border);
- border-radius: 12px; list-style: none; padding: 5px 0; margin-top: 5px;
- max-height: 180px; overflow-y: auto; z-index: 1000;
- box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: none;
-}
-#suggestionsList li {
- padding: 10px 15px; cursor: pointer; font-size: 13px; color: var(--text);
- transition: 0.2s;
-}
-#suggestionsList li:hover {
- background: var(--blue); color: #fff;
-}
-.fav-action-bar {
- display: flex; gap: 8px; margin-bottom: 10px;
-}
-.fav-btn-action {
- background: var(--card2); border: 1px solid var(--border); color: var(--accent);
- padding: 10px 15px; border-radius: 14px; font-size: 13px; font-weight: bold;
- cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
-}
-.fav-btn-action:hover { background: var(--accent); color: #000; }
-#favoritesChipsContainer {
- display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
-}
-.fav-chip {
- background: var(--card2); border: 1px solid var(--border); color: var(--text);
- padding: 5px 12px; border-radius: 20px; font-size: 11px; cursor: pointer;
- transition: 0.2s; display: inline-flex; align-items: center; gap: 5px;
-}
-.fav-chip:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
 </style>
 </head>
 
 <body>
 
-<!-- طبقة التأثيرات -->
+<!-- طبقة التأثيرات: سحب متحركة، مطر، وبرق يتكرر كل 5 ثواني -->
 <div id="weatherEffects" aria-hidden="true">
  <div class="effect effect-cloud c1"></div>
  <div class="effect effect-cloud c2"></div>
@@ -384,22 +389,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
   <div class="project-box">رقم المشروع 166<strong>إشراف الدكتور رشدي فاروق</strong></div>
  </div>
 
- <form class="search" id="searchForm" style="position: relative;">
-  <input id="cityInput" placeholder="ابحث عن مدينة أو محافظة..." aria-label="ابحث عن مدينة" autocomplete="off">
+ <form class="search" id="searchForm">
+  <input id="cityInput" placeholder="ابحث عن مدينة أو محافظة..." aria-label="ابحث عن مدينة">
   <button class="primary" type="submit">بحث 🔎</button>
-  <ul id="suggestionsList"></ul>
  </form>
 
- <div class="fav-action-bar">
-  <button type="button" class="fav-btn-action" id="saveFavBtn">⭐ حفظ المدينة الحالية للمفضلة</button>
- </div>
- <div id="favoritesChipsContainer"></div>
-
+ <!-- شريط المحافظات والمدن السريع + زرار خريطة المحافظات التفاعلي -->
  <div class="quick-bar-wrapper">
   <div class="quick-cities" id="quickCitiesBar"></div>
   <button type="button" class="map-launcher-btn" id="openMapBtn">🗺️ خريطة وبحث المحافظات التفاعلي</button>
  </div>
 
+ <!-- نافذة الخريطة التفاعلية (Modal) لاختيار المحافظات والبحث فيها -->
  <div class="map-modal hidden" id="mapModal">
   <div class="map-modal-content">
    <div class="map-modal-header">
@@ -413,9 +414,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
 
  <button class="location" id="locationButton">📍 استخدام موقعي الحالي</button>
 
+ <!-- التحكم والتوقيت والأصوات والتغيير بين الدرجات -->
  <div class="extra-controls">
   <div id="localTimeDisplay" class="local-clock">الساعة: --:--</div>
   <div style="display:flex;gap:6px;">
+   <button type="button" class="sound-btn" id="soundBtn">🔊 صوت المطر</button>
    <button type="button" class="unit-btn" id="unitBtn">°C / °F</button>
   </div>
  </div>
@@ -436,6 +439,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
    <div class="feels" id="feels">المحسوسة: --°</div>
   </div>
   
+  <!-- مساعد الملابس الذكي -->
   <div class="outfit-card" id="outfitCard">
    <div class="outfit-icon" id="outfitIcon">👔</div>
    <div class="outfit-info">
@@ -508,6 +512,7 @@ function setTheme(value){
 setTheme(theme);
 $("themeButton").addEventListener("click",()=>setTheme(theme==="dark"?"light":"dark"));
 
+/* ===== كافة المحافظات والمدن المصرية الـ 27 والمراكز الكبرى ===== */
 const cities={
  "القاهرة":[30.0444,31.2357],
  "الجيزة":[30.0131,31.2089],
@@ -561,6 +566,7 @@ const cities={
  "العاصمة الإدارية":[30.0038,31.7094]
 };
 
+// إنشاء شريط الأزرار السريعة أفقياً
 const quickBar = $("quickCitiesBar");
 Object.keys(cities).forEach(cityName => {
  const btn = document.createElement("button");
@@ -571,6 +577,7 @@ Object.keys(cities).forEach(cityName => {
  quickBar.appendChild(btn);
 });
 
+// تعبئة خريطة المدن داخل النافذة التفاعلية (Modal)
 const mapGrid = $("mapCitiesGrid");
 const renderMapGrid = (filter="") => {
  mapGrid.innerHTML = "";
@@ -592,12 +599,60 @@ $("openMapBtn").addEventListener("click", () => $("mapModal").classList.remove("
 $("closeMapBtn").addEventListener("click", () => $("mapModal").classList.add("hidden"));
 $("mapSearchInput").addEventListener("input", e => renderMapGrid(e.target.value.trim()));
 
+// إغلاق نافذة الخريطة عند النقر خارجها
 $("mapModal").addEventListener("click", e => {
  if(e.target === $("mapModal")) $("mapModal").classList.add("hidden");
 });
 
 let isCelsius = true;
 let lastWeatherData = null;
+let audioCtx = null;
+let rainGainNode = null;
+let isSoundPlaying = false;
+
+/* ===== تشغيل/إيقاف صوت المطر ===== */
+function startWeatherAudio(){
+ if(!isSoundPlaying){
+  try {
+   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+   const bufferSize = audioCtx.sampleRate * 2;
+   const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+   const output = buffer.getChannelData(0);
+   for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
+   
+   const whiteNoise = audioCtx.createBufferSource();
+   whiteNoise.buffer = buffer;
+   whiteNoise.loop = true;
+   
+   const filter = audioCtx.createBiquadFilter();
+   filter.type = 'lowpass';
+   filter.frequency.value = 800;
+   
+   rainGainNode = audioCtx.createGain();
+   rainGainNode.gain.value = 0.12;
+   
+   whiteNoise.connect(filter);
+   filter.connect(rainGainNode);
+   rainGainNode.connect(audioCtx.destination);
+   whiteNoise.start();
+
+   isSoundPlaying = true;
+   $("soundBtn").textContent = "🔊 إيقاف الصوت";
+   $("soundBtn").classList.add("active");
+  } catch(e) {
+   alert("تعذر تشغيل الصوت في المتصفح الحالي.");
+  }
+ } else {
+  if(audioCtx){
+   audioCtx.close();
+   audioCtx = null;
+  }
+  isSoundPlaying = false;
+  $("soundBtn").textContent = "🔇 صوت المطر";
+  $("soundBtn").classList.remove("active");
+ }
+}
+$("soundBtn").addEventListener("click", startWeatherAudio);
 
 function convertTemp(c){
  if(isCelsius) return Math.round(c) + "°";
@@ -625,17 +680,18 @@ function startLocalClock(timezoneOffsetSeconds = 0){
  clockInterval = setInterval(updateClock, 1000);
 }
 
+/* ===== تحليل ملابس الطقس ===== */
 function updateOutfitAdvisor(temp, code){
  const iconEl = $("outfitIcon");
  const textEl = $("outfitText");
  
- if([71,73,75,77,85,86].includes(code) || temp < 10){
+ if([51,53,55,61,63,65,80,81,82,95,96,99].includes(code)){
+  iconEl.textContent = "☔";
+  textEl.textContent = "الجو ممطر! يُفضل ارتداء ملابس مقاومة للماء واصطحاب مظلة.";
+ } else if(temp < 15){
   iconEl.textContent = "🧥";
-  textEl.textContent = "الجو بارد جداً وهناك تساقط للثلوج! ارتدِ معطفاً ثقيلاً جداً وملابس دافئة.";
- } else if(temp >= 10 && temp < 18){
-  iconEl.textContent = "🧥";
-  textEl.textContent = "الجو بارد، ارتدِ معطفاً أو ملابس صوفية ثقيلة للحماية من البرد.";
- } else if(temp >= 18 && temp < 22){
+  textEl.textContent = "الجو بارد جداً! ارتدِ معطفاً ثقيلاً وملابس صوفية للحماية من البرد.";
+ } else if(temp >= 15 && temp < 22){
   iconEl.textContent = "👔";
   textEl.textContent = "الجو معتدل ومائل للبرودة، جاكيت خفيف أو قميص بأكمام طويلة مناسب جداً.";
  } else if(temp >= 22 && temp < 30){
@@ -647,24 +703,19 @@ function updateOutfitAdvisor(temp, code){
  }
 }
 
-function updateWeatherEffects(){
- const layer = $("weatherEffects");
- layer.querySelectorAll('.effect-snow').forEach(el => el.remove());
+/* ===== التأثيرات الجوية ===== */
+function updateWeatherEffects(code,isDay=true){
+ const layer=$("weatherEffects");
+ layer.querySelectorAll('.effect-rain').forEach(el => el.remove());
 
- for(let i = 0; i < 30; i++){
-  const flake = document.createElement("div");
-  flake.className = "effect effect-snow";
-  
-  const size = (Math.random() * 4 + 3) + "px";
-  flake.style.width = size;
-  flake.style.height = size;
-  
-  flake.style.left = (Math.random() * 100) + "%";
-  flake.style.animationDuration = (4 + Math.random() * 5) + "s";
-  flake.style.animationDelay = (-Math.random() * 5) + "s";
-  flake.style.opacity = String(0.4 + Math.random() * 0.5);
-  
-  layer.appendChild(flake);
+ for(let i=0; i<45; i++){
+  const rain=document.createElement("div");
+  rain.className="effect effect-rain";
+  rain.style.left=(Math.random()*105-3)+"%";
+  rain.style.animationDuration=(0.6+Math.random()*0.5)+"s";
+  rain.style.animationDelay=(-Math.random()*3)+"s";
+  rain.style.opacity=String(0.4+Math.random()*0.5);
+  layer.appendChild(rain);
  }
 }
 
@@ -683,11 +734,11 @@ function weatherInfo(code,isDay=true){
  if([1,2].includes(code))return {text:"غائم جزئيًا",icon:isDay?"🌤️":"☁️"};
  if(code===3)return {text:"غائم",icon:"☁️"};
  if([45,48].includes(code))return {text:"ضباب",icon:"🌫️"};
- if([51,53,55,56,57].includes(code))return {text:"رذاذ خفيف",icon:"🌨️"};
- if([61,63,65,66,67,80,81,82].includes(code))return {text:"أجواء باردة",icon:"🌨️"};
- if([71,73,75,77,85,86].includes(code))return {text:"تساقط ثلوج",icon:"❄️"};
- if([95,96,99].includes(code))return {text:"عواصف ثلجية/رعدية",icon:"❄️"};
- return {text:"حالة الطقس",icon:"❄️"};
+ if([51,53,55,56,57].includes(code))return {text:"رذاذ",icon:"🌦️"};
+ if([61,63,65,66,67,80,81,82].includes(code))return {text:"أمطار",icon:"🌧️"};
+ if([71,73,75,77,85,86].includes(code))return {text:"ثلوج",icon:"❄️"};
+ if([95,96,99].includes(code))return {text:"عواصف رعدية",icon:"⛈️"};
+ return {text:"حالة الطقس",icon:"🌤️"};
 }
 
 function localDate(date){
@@ -736,7 +787,7 @@ function renderWeatherDetails(data){
  const c=data.current, d=data.daily, h=data.hourly;
  const info=weatherInfo(c.weather_code, c.is_day===1);
 
- updateWeatherEffects();
+ updateWeatherEffects(c.weather_code, c.is_day===1);
  updateOutfitAdvisor(c.temperature_2m, c.weather_code);
 
  $("cityName").textContent=currentPlace.name;
@@ -833,3 +884,125 @@ function renderForecast(d){
 }
 
 function renderChart(d){
+ const svg=$("chart"),W=600,H=180,left=40,right=20,top=24,bottom=25;
+ const maxs=d.temperature_2m_max.map(Number);
+ const mins=d.temperature_2m_min.map(Number);
+ const max=Math.max(...maxs,...mins)+3;
+ const min=Math.min(...maxs,...mins)-3;
+ const x=i=>left+i*(W-left-right)/(d.time.length-1);
+ const y=v=>top+(max-v)*(H-top-bottom)/(max-min);
+ const points=values=>values.map((v,i)=>x(i)+","+y(v)).join(" ");
+ let html='<polyline class="chart-line" points="'+points(maxs)+'"/>';
+ html+='<polyline class="chart-line chart-low" points="'+points(mins)+'"/>';
+ maxs.forEach((v,i)=>{
+  html+='<circle class="chart-dot" cx="'+x(i)+'" cy="'+y(v)+'" r="6"/>';
+  html+='<text x="'+x(i)+'" y="'+(y(v)-13)+'" text-anchor="middle">'+convertTemp(v)+'</text>';
+  html+='<circle class="chart-dot" cx="'+x(i)+'" cy="'+y(mins[i])+'" r="5"/>';
+  html+='<text x="'+x(i)+'" y="'+(y(mins[i])+23)+'" text-anchor="middle">'+convertTemp(mins[i])+'</text>';
+ });
+ svg.innerHTML=html;
+}
+
+$("lineButton").addEventListener("click",()=>{
+ $("lineView").classList.remove("hidden");
+ $("listView").classList.add("hidden");
+ $("lineButton").classList.add("active");
+ $("listButton").classList.remove("active");
+});
+$("listButton").addEventListener("click",()=>{
+ $("lineView").classList.add("hidden");
+ $("listView").classList.remove("hidden");
+ $("listButton").classList.add("active");
+ $("lineButton").classList.remove("active");
+});
+
+async function loadAirQuality(lat,lon,id){
+ const url="https://air-quality-api.open-meteo.com/v1/air-quality?latitude="+lat+
+ "&longitude="+lon+"&current=us_aqi,european_aqi,pm2_5,pm10&timezone=auto";
+ try{
+  const response=await fetch(url);
+  if(!response.ok)throw Error("air");
+  const data=await response.json();
+  if(id!==requestId)return;
+  const c=data.current,aqi=c.us_aqi;
+  if(aqi===null||aqi===undefined)throw Error("no aqi");
+
+  let label,description;
+  if(aqi<=50){label="جيدة";description="جودة الهواء جيدة، والتلوث قليل عادةً."}
+  else if(aqi<=100){label="متوسطة";description="قد يتأثر بعض الأشخاص الأكثر حساسية."}
+  else if(aqi<=150){label="غير صحية للفئات الحساسة";description="يُفضّل تقليل المجهود الخارجي للفئات الحساسة."}
+  else if(aqi<=200){label="غير صحية";description="يُنصح بتقليل الأنشطة الخارجية الطويلة."}
+  else if(aqi<=300){label="سيئة جدًا";description="يُنصح بتجنب المجهود الخارجي قدر الإمكان."}
+  else{label="خطيرة";description="التلوث مرتفع جدًا؛ قلل التعرض للهواء الخارجي."}
+
+  const pct=Math.max(0,Math.min(100,aqi/300*100));
+  $("airContent").innerHTML=
+   '<div class="aqi-number">'+Math.round(aqi)+' <span class="aqi-label">'+label+'</span></div>'+
+   '<div class="aqi-description">'+description+'</div>'+
+   '<div class="aqi-bar"><span class="aqi-marker" style="left:'+pct+'%"></span></div>'+
+   '<div class="aqi-scale"><span>جيدة</span><span>متوسطة</span><span>مرتفعة</span><span>خطيرة</span></div>'+
+   '<div class="air-details">'+
+   '<div class="air-item"><span>الجسيمات الدقيقة PM2.5</span><strong>'+(c.pm2_5==null?"غير متاح":Number(c.pm2_5).toFixed(1)+" µg/m³")+'</strong></div>'+
+   '<div class="air-item"><span>الجسيمات PM10</span><strong>'+(c.pm10==null?"غير متاح":Number(c.pm10).toFixed(1)+" µg/m³")+'</strong></div>'+
+   '<div class="air-item"><span>المؤشر الأمريكي AQI</span><strong>'+Math.round(aqi)+'</strong></div>'+
+   '<div class="air-item"><span>المؤشر الأوروبي AQI</span><strong>'+(c.european_aqi==null?"غير متاح":Math.round(c.european_aqi))+'</strong></div>'+
+   '</div><div class="muted" style="margin-top:14px">المصدر: Open-Meteo Air Quality</div>';
+ }catch(e){
+  if(id!==requestId)return;
+  $("airContent").innerHTML='<div class="status">تعذر الحصول على بيانات جودة الهواء حاليًا. الطقس يعمل بشكل مستقل.</div>';
+ }
+}
+
+$("searchForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const query=$("cityInput").value.trim();
+ if(query.length<2){setStatus("اكتب اسم مدينة أو دولة أولًا.",true);return;}
+ const normalized=query.replace(/\s+/g," ").toLocaleLowerCase("ar");
+ const local=Object.keys(cities).find(k=>k.toLocaleLowerCase("ar")===normalized);
+ if(local){loadWeather(cities[local][0],cities[local][1],local+"، مصر");return;}
+
+ setStatus("🔎 جاري البحث عن المكان...");
+ try{
+  const url="https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(query)+"&count=10&language=ar&format=json";
+  const response=await fetch(url);
+  if(!response.ok)throw Error("geo");
+  const result=await response.json();
+  if(!result.results?.length){
+   setStatus("لم نعثر على المكان. جرّب الاسم بالإنجليزية أو أضف الدولة.",true);
+   return;
+  }
+  const locations=result.results;
+  const exact=locations.find(p=>p.name.toLocaleLowerCase()===query.toLocaleLowerCase());
+  const place=exact||locations[0];
+  const parts=[place.name,place.admin1,place.country].filter(Boolean);
+  loadWeather(place.latitude,place.longitude,[...new Set(parts)].join("، "));
+ }catch(e){
+  setStatus("تعذر البحث. تأكد من الإنترنت وحاول مرة أخرى.",true);
+ }
+});
+
+$("locationButton").addEventListener("click",()=>{
+ if(!navigator.geolocation){setStatus("المتصفح لا يدعم تحديد الموقع.",true);return;}
+ setStatus("📍 جاري تحديد موقعك...");
+ navigator.geolocation.getCurrentPosition(
+  p=>loadWeather(p.coords.latitude,p.coords.longitude,"موقعك الحالي"),
+  ()=>setStatus("لم نتمكن من تحديد موقعك. اسمح للمتصفح باستخدام الموقع.",true),
+  {enableHighAccuracy:false,timeout:15000}
+ );
+});
+
+$("refreshButton").addEventListener("click",()=>{
+ loadWeather(currentPlace.lat,currentPlace.lon,currentPlace.name);
+});
+
+loadWeather(30.0444,31.2357,"القاهرة، مصر");
+
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("/taqsi-weather/service-worker.js")
+   .catch(e=>console.log("Service Worker غير متاح:",e));
+ });
+}
+</script>
+</body>
+</html>
