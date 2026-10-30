@@ -183,9 +183,24 @@ button:focus-visible,input:focus-visible{
 .outfit-info h3{margin:0 0 5px;font-size:15px;color:var(--accent)}
 .outfit-info p{margin:0;font-size:12px;color:var(--muted);line-height:1.6}
 
-/* التصميم الأصلي */
+/* التصميم الأصلي مع تنسيق عنوان Weather وأيقونة الطقس المتحركة */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 0 18px}
-.brand{font-size:27px;font-weight:900}
+.brand{
+ font-size:27px;font-weight:900;display:flex;align-items:center;gap:10px;direction: ltr;
+}
+.animated-weather-icon{
+ display:inline-block;
+ animation: floatAndRotate 3s ease-in-out infinite;
+}
+@keyframes floatAndRotate {
+ 0%, 100% {
+  transform: translateY(0) rotate(0deg);
+ }
+ 50% {
+  transform: translateY(-5px) rotate(6deg);
+ }
+}
+
 .top-actions{display:flex;gap:8px}
 .small-btn{
  border:1px solid var(--border);background:var(--card2);color:var(--text);
@@ -377,7 +392,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
 
 <div class="app">
  <div class="topbar">
-  <div class="brand">🌤️ الطقس</div>
+  <div class="brand">
+   <span class="animated-weather-icon">🌤️</span> Weather
+  </div>
   <div class="top-actions">
    <button class="small-btn" id="refreshButton" aria-label="تحديث الطقس">↻</button>
    <button class="small-btn" id="themeButton">☀️</button>
