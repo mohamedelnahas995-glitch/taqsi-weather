@@ -162,14 +162,15 @@ button:focus-visible,input:focus-visible{
 .extra-controls{
  display:flex;gap:8px;margin-bottom:12px;align-items:center;justify-content:space-between;
  background:var(--card2);padding:8px 12px;border-radius:14px;border:1px solid var(--border);
- font-size:12px;color:var(--muted)
+ font-size:12px;color:var(--muted);flex-wrap:wrap;
 }
 .local-clock{font-weight:bold;color:var(--text)}
-.sound-btn,.unit-btn{
+.sound-btn,.unit-btn,.voice-btn{
  background:var(--card);border:1px solid var(--border);color:var(--text);
  padding:5px 10px;border-radius:10px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px
 }
 .sound-btn.active{background:var(--green);color:#000;font-weight:bold;border-color:var(--green)}
+.voice-btn:hover{background:var(--blue);color:#fff}
 
 .outfit-card{
  background:linear-gradient(135deg,var(--card2),var(--card));
@@ -438,6 +439,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  <div class="extra-controls">
   <div id="localTimeDisplay" class="local-clock">الساعة: --:--</div>
   <div style="display:flex;gap:6px;">
+   <!-- زر المساعد الصوتي (خاصية رقم 4) -->
+   <button type="button" class="voice-btn" id="voiceBtn">🗣️ القارئ الصوتي</button>
    <button type="button" class="sound-btn" id="soundBtn">🔊 صوت المطر</button>
    <button type="button" class="unit-btn" id="unitBtn">°C / °F</button>
   </div>
@@ -475,7 +478,19 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
   </div>
  </section>
 
- <!-- قسم رادار السحب والأمطار (الخاصية رقم 5) -->
+ <!-- قسم مؤشر الأشعة فوق البنفسجية واحتياج واقي الشمس (خاصية رقم 2) -->
+ <section class="card">
+  <div class="card-heading">
+   <h2>☀️ مؤشر الأشعة فوق البنفسجية (UV Index)</h2>
+   <span class="muted">الحماية من الشمس</span>
+  </div>
+  <div style="padding:10px 0; text-align:center;">
+   <div style="font-size:28px; font-weight:bold; color:var(--accent);" id="uvValue">--</div>
+   <div style="font-size:14px; margin-top:5px; font-weight:bold;" id="uvStatus">جاري التحميل...</div>
+   <p style="font-size:12px; color:var(--muted); margin-top:8px; line-height:1.6;" id="uvAdvice">--</p>
+  </div>
+ </section>
+
  <section class="card">
   <div class="card-heading">
    <h2>📡 رادار السحب والأمطار التفاعلي</h2>
@@ -636,7 +651,6 @@ let isSoundPlaying = false;
 let radarMap = null;
 let radarMarker = null;
 
-/* ===== تهيئة خريطة رادار الطقس الحية ===== */
 function initRadarMap(lat, lon) {
  if (!radarMap) {
   radarMap = L.map('radarMap').setView([lat, lon], 7);
@@ -645,7 +659,6 @@ function initRadarMap(lat, lon) {
    attribution: '© OpenStreetMap'
   }).addTo(radarMap);
 
-  // إضافة طبقة تغطية السحب والأمطار الحية من RainViewer
   fetch('https://api.rainviewer.com/public/weather-maps.json')
    .then(res => res.json())
    .then(apiData => {
@@ -708,6 +721,25 @@ function startWeatherAudio(){
 }
 $("soundBtn").addEventListener("click", startWeatherAudio);
 
+/* ===== المساعد الصوتي بقراءة الطقس (خاصية رقم 4) ===== */
+function speakWeather() {
+ if (!('speechSynthesis' in window)) {
+  alert("متصفحك لا يدعم خاصية القراءة الصوتية.");
+  return;
+ }
+ window.speechSynthesis.cancel();
+ const city = $("cityName").textContent;
+ const temp = $("temperature").textContent;
+ const desc = $("description").textContent;
+ const text = `حالة الطقس حالياً في ${city} هي ${desc}، ودرجة الحرارة تسجل ${temp}.`;
+ 
+ const utterance = new SpeechSynthesisUtterance(text);
+ utterance.lang = 'ar-SA';
+ utterance.rate = 0.9;
+ window.speechSynthesis.speak(utterance);
+}
+$("voiceBtn").addEventListener("click", speakWeather);
+
 function convertTemp(c){
  if(isCelsius) return Math.round(c) + "°";
  return Math.round((c * 9/5) + 32) + "°F";
@@ -756,6 +788,40 @@ function updateOutfitAdvisor(temp, code){
  }
 }
 
+/* ===== مؤشر الأشعة فوق البنفسجية واحتياج واقي الشمس (خاصية رقم 2) ===== */
+function updateUVIndex(uv) {
+ const uvVal = $("uvValue");
+ const uvStat = $("uvStatus");
+ const uvAdv = $("uvAdvice");
+
+ uvVal.textContent = uv != null ? Math.round(uv) : "--";
+
+ if (uv == null) {
+  uvStat.textContent = "غير متاح";
+  uvAdv.textContent = "لا تتوفر بيانات الأشعة فوق البنفسجية حالياً.";
+ } else if (uv <= 2) {
+  uvStat.textContent = "منخفض 🟢";
+  uvStat.style.color = "#35d48a";
+  uvAdv.textContent = "نسبة آمنة تماماً. لا توجد حاجة لاستخدام واقي شمس.";
+ } else if (uv <= 5) {
+  uvStat.textContent = "معتدل 🟡";
+  uvStat.style.color = "#ffca36";
+  uvAdv.textContent = "يُوصى بارتداء نظارة شمسية واستخدام واقي الشمس إذا كنت ستتأثر بالشمس لفترة طويلة.";
+ } else if (uv <= 7) {
+  uvStat.textContent = "مرتفع 🟠";
+  uvStat.style.color = "#ff8c00";
+  uvAdv.textContent = "يجب ارتداء ملابس واقية، قبعة، ونظارة شمسية مع وضع واقي الشمس (SPF 30+).";
+ } else if (uv <= 10) {
+  uvStat.textContent = "مرتفع جداً 🔴";
+  uvStat.style.color = "#ff4500";
+  uvAdv.textContent = "خطر شديد! قلل التواجد تحت أشعة الشمس المباشرة واستخدم واقي الشمس حتماً.";
+ } else {
+  uvStat.textContent = "خطير للغاية 🟣";
+  uvStat.style.color = "#b749da";
+  uvAdv.textContent = "تجنب الخروج تحت الشمس تماماً في أوقات الظهيرة للحفاظ على سلامة بشرتك.";
+ }
+}
+
 function updateWeatherEffects(code,isDay=true){
  const layer=$("weatherEffects");
  layer.querySelectorAll('.effect-rain').forEach(el => el.remove());
@@ -771,7 +837,7 @@ function updateWeatherEffects(code,isDay=true){
  }
 }
 
-const dayNames=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","السبت"];
+const dayNames=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const monthNames=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 let currentPlace={lat:30.0444,lon:31.2357,name:"القاهرة، مصر"};
 let requestId=0;
@@ -810,8 +876,8 @@ async function loadWeather(lat,lon,name){
  const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+
  "&longitude="+lon+
  "&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m"+
- "&hourly=temperature_2m,weather_code"+
- "&daily=weather_code,temperature_2m_max,temperature_2m_min"+
+ "&hourly=temperature_2m,weather_code,uv_index"+
+ "&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max"+
  "&timezone=auto&forecast_days=5";
 
  try{
@@ -842,6 +908,7 @@ function renderWeatherDetails(data){
 
  updateWeatherEffects(c.weather_code, c.is_day===1);
  updateOutfitAdvisor(c.temperature_2m, c.weather_code);
+ updateUVIndex(d.uv_index_max ? d.uv_index_max[0] : null);
 
  $("cityName").textContent=currentPlace.name;
  $("updated").textContent="آخر تحديث: "+c.time.replace("T"," ");
