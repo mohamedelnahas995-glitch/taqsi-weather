@@ -72,6 +72,8 @@ button:focus-visible,input:focus-visible{
  box-shadow:0 0 6px rgba(118,186,255,0.4);
  animation:rainFall 0.8s linear infinite;
  z-index:0;
+ opacity: 0; /* مخفي افتراضياً لحين حدوث البرق */
+ transition: opacity 0.3s ease;
 }
 @keyframes rainFall{
  0%{transform:translate3d(0,-5vh,0);opacity:0}
@@ -86,13 +88,13 @@ button:focus-visible,input:focus-visible{
  opacity:0;
  pointer-events:none;
  z-index:0;
- animation: lightningTimer 5s infinite;
+ animation: lightningTimer 10s infinite;
 }
 @keyframes lightningTimer{
- 0%, 94%, 98%, 100% { opacity: 0; }
- 95% { opacity: 0.9; }
- 96% { opacity: 0.2; }
- 97% { opacity: 0.7; }
+ 0%, 89%, 93%, 100% { opacity: 0; }
+ 90% { opacity: 0.9; }
+ 91% { opacity: 0.2; }
+ 92% { opacity: 0.7; }
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -100,7 +102,7 @@ button:focus-visible,input:focus-visible{
  #weatherEffects{opacity:.22}
 }
 
-/* تصميم النقطة التفاعلية (وميض أحمر ونبض للغائم / أزرق مستقر) */
+/* تصميم النقطة التفاعلية */
 .city-header-wrapper {
   display: flex;
   align-items: center;
@@ -124,21 +126,9 @@ button:focus-visible,input:focus-visible{
   animation: pulse-red 1.2s infinite ease-in-out;
 }
 @keyframes pulse-red {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.9);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.25);
-    box-shadow: 0 0 15px 6px rgba(255, 51, 51, 0.5);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
-    opacity: 1;
-  }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.9); opacity: 1; }
+  50% { transform: scale(1.25); box-shadow: 0 0 15px 6px rgba(255, 51, 51, 0.5); opacity: 0.6; }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); opacity: 1; }
 }
 
 .quick-bar-wrapper{
@@ -226,12 +216,8 @@ button:focus-visible,input:focus-visible{
  animation: floatAndRotate 3s ease-in-out infinite;
 }
 @keyframes floatAndRotate {
- 0%, 100% {
-  transform: translateY(0) rotate(0deg);
- }
- 50% {
-  transform: translateY(-5px) rotate(6deg);
- }
+ 0%, 100% { transform: translateY(0) rotate(0deg); }
+ 50% { transform: translateY(-5px) rotate(6deg); }
 }
 
 .top-actions{display:flex;gap:8px}
@@ -478,7 +464,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
    <div class="muted">🌍 حول العالم</div>
   </div>
   <div class="current">
-   <!-- عنصر المدينة مع حاوية النقطة التفاعلية -->
    <div class="city" id="cityName">
      <div class="city-header-wrapper">
        <span id="weatherDot" class="status-dot blue"></span>
@@ -670,6 +655,60 @@ let lastWeatherData = null;
 let audioCtx = null;
 let rainGainNode = null;
 let isSoundPlaying = false;
+let userToggledSound = false;
+
+function triggerLightningAndRain() {
+ const flash = $("lightningFlash");
+ const rains = document.querySelectorAll('.effect-rain');
+ 
+ // تشغيل وميض البرق (عبر إعادة تشغيل الـ animation)
+ flash.style.animation = 'none';
+ flash.offsetHeight; // Trigger reflow
+ flash.style.animation = 'lightningTimer 10s infinite';
+
+ // إظهار المطر لمدة 5 ثوانٍ
+ rains.forEach(r => r.style.opacity = '1');
+
+ // تشغيل صوت المطر لمدة 5 ثوانٍ إذا لم يكن المستخدم قد شغله مسبقاً يدوياً
+ let tempAudioCtx = null;
+ let tempGain = null;
+ try {
+  tempAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const bufferSize = tempAudioCtx.sampleRate * 2;
+  const buffer = tempAudioCtx.createBuffer(1, bufferSize, tempAudioCtx.sampleRate);
+  const output = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
+  
+  const whiteNoise = tempAudioCtx.createBufferSource();
+  whiteNoise.buffer = buffer;
+  whiteNoise.loop = true;
+  
+  const filter = tempAudioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 800;
+  
+  tempGain = tempAudioCtx.createGain();
+  tempGain.gain.value = 0.12;
+  
+  whiteNoise.connect(filter);
+  filter.connect(tempGain);
+  tempGain.connect(tempAudioCtx.destination);
+  whiteNoise.start();
+ } catch(e) {}
+
+ // إيقاف المطر والصوت بعد 5 ثوانٍ بدقة
+ setTimeout(() => {
+  rains.forEach(r => r.style.opacity = '0');
+  if(tempAudioCtx && !isSoundPlaying) {
+   tempAudioCtx.close();
+  }
+ }, 5000);
+}
+
+// جدولة تكرار البرق والمطر كل 10 ثوانٍ ليتزامن مع الوميض المستمر
+setInterval(() => {
+ triggerLightningAndRain();
+}, 10000);
 
 function startWeatherAudio(){
  if(!isSoundPlaying){
@@ -823,7 +862,7 @@ function updateWeatherEffects(code,isDay=true){
   rain.style.left=(Math.random()*105-3)+"%";
   rain.style.animationDuration=(0.6+Math.random()*0.5)+"s";
   rain.style.animationDelay=(-Math.random()*3)+"s";
-  rain.style.opacity=String(0.4+Math.random()*0.5);
+  rain.style.opacity="0"; // يبدأ مخفياً ليعمل مع البرق
   layer.appendChild(rain);
  }
 }
@@ -898,7 +937,7 @@ function renderWeatherDetails(data){
  updateOutfitAdvisor(c.temperature_2m, c.weather_code);
  updateUVIndex(d.uv_index_max ? d.uv_index_max[0] : null);
 
- // تحديث حالة النقطة التفاعلية (أحمر وامض للغائم / أزرق للصافي)
+ // تحديث حالة النقطة التفاعلية
  const dot = $("weatherDot");
  const isCloudy = [1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(c.weather_code);
  
