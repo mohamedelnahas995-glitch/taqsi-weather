@@ -101,26 +101,28 @@ button:focus-visible,input:focus-visible{
 }
 
 /* تصميم النقطة التفاعلية (وميض أحمر ونبض للغائم / أزرق مستقر) */
+.city-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 .status-dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   display: inline-block;
-  vertical-align: middle;
-  margin-right: 10px;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
-
 .status-dot.blue {
   background-color: #0088ff;
   box-shadow: 0 0 10px rgba(0, 136, 255, 0.8);
 }
-
 .status-dot.cloudy-red {
   background-color: #ff3333;
   animation: pulse-red 1.2s infinite ease-in-out;
 }
-
 @keyframes pulse-red {
   0% {
     transform: scale(0.95);
@@ -288,7 +290,7 @@ button:focus-visible,input:focus-visible{
 .card h2{font-size:17px;margin:0}
 .muted{color:var(--muted);font-size:12px;line-height:1.8}
 .current{text-align:center;padding:15px 0 20px}
-.city{font-size:28px;font-weight:800;margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
+.city{font-size:28px;font-weight:800;margin-bottom:5px}
 .date{color:var(--muted);font-size:13px}
 .main-icon{font-size:75px;line-height:1.5;margin-top:5px}
 .temperature{font-size:82px;font-weight:700;line-height:1.2;letter-spacing:-3px}
@@ -476,8 +478,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
    <div class="muted">🌍 حول العالم</div>
   </div>
   <div class="current">
-   <!-- تمت إضافة النقطة التفاعلية بجانب اسم المدينة هنا -->
-   <div class="city" id="cityName"><span id="weatherDot" class="status-dot blue"></span>القاهرة</div>
+   <!-- عنصر المدينة مع حاوية النقطة التفاعلية -->
+   <div class="city" id="cityName">
+     <div class="city-header-wrapper">
+       <span id="weatherDot" class="status-dot blue"></span>
+       <span id="cityNameText">القاهرة</span>
+     </div>
+   </div>
    <div class="date" id="updated">مصر</div>
    <div class="main-icon" id="weatherIcon">🌤️</div>
    <div class="temperature" id="temperature">--<small>°C</small></div>
@@ -713,7 +720,7 @@ function speakWeather() {
   return;
  }
  window.speechSynthesis.cancel();
- const city = $("cityName").textContent;
+ const city = $("cityNameText").textContent;
  const temp = $("temperature").textContent;
  const desc = $("description").textContent;
  const text = `حالة الطقس حالياً في ${city} هي ${desc}، ودرجة الحرارة تسجل ${temp}.`;
@@ -891,20 +898,19 @@ function renderWeatherDetails(data){
  updateOutfitAdvisor(c.temperature_2m, c.weather_code);
  updateUVIndex(d.uv_index_max ? d.uv_index_max[0] : null);
 
- // تحديث اسم المدينة والنقطة التفاعلية بناءً على كود حالة الطقس
+ // تحديث حالة النقطة التفاعلية (أحمر وامض للغائم / أزرق للصافي)
  const dot = $("weatherDot");
  const isCloudy = [1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(c.weather_code);
+ 
  if (isCloudy) {
   dot.className = "status-dot cloudy-red";
   dot.title = "الجو غائم";
  } else {
   dot.className = "status-dot blue";
-  dot.title = "الجو صافٍ/غير غائم";
+  dot.title = "الجو صافٍ";
  }
 
- $("cityName").innerHTML = '';
- $("cityName"].appendChild(dot);
- $("cityName"].append(currentPlace.name);
+ $("cityNameText").textContent = currentPlace.name;
 
  $("updated").textContent="آخر تحديث: "+c.time.replace("T"," ");
  $("weatherIcon").textContent=info.icon;
