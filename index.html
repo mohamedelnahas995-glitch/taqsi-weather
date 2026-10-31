@@ -7,10 +7,6 @@
 <link rel="manifest" href="manifest.json">
 <title>طقسي | متابعة حالة الطقس</title>
 
-<!-- مكتبة Leaflet للخرائط التفاعلية -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <style>
 :root{
  --bg:#080f30;--card:#0a1236;--card2:#111c43;
@@ -181,16 +177,6 @@ button:focus-visible,input:focus-visible{
 .outfit-icon{font-size:42px;background:var(--card);padding:12px;border-radius:14px;border:1px solid var(--border)}
 .outfit-info h3{margin:0 0 5px;font-size:15px;color:var(--accent)}
 .outfit-info p{margin:0;font-size:12px;color:var(--muted);line-height:1.6}
-
-/* خريطة رادار الطقس */
-#radarMap {
- width: 100%;
- height: 320px;
- border-radius: 16px;
- margin-top: 10px;
- border: 1px solid var(--border);
- z-index: 1;
-}
 
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 0 18px}
 .brand{
@@ -439,7 +425,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  <div class="extra-controls">
   <div id="localTimeDisplay" class="local-clock">الساعة: --:--</div>
   <div style="display:flex;gap:6px;">
-   <!-- زر المساعد الصوتي (خاصية رقم 4) -->
    <button type="button" class="voice-btn" id="voiceBtn">🗣️ القارئ الصوتي</button>
    <button type="button" class="sound-btn" id="soundBtn">🔊 صوت المطر</button>
    <button type="button" class="unit-btn" id="unitBtn">°C / °F</button>
@@ -478,7 +463,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
   </div>
  </section>
 
- <!-- قسم مؤشر الأشعة فوق البنفسجية واحتياج واقي الشمس (خاصية رقم 2) -->
  <section class="card">
   <div class="card-heading">
    <h2>☀️ مؤشر الأشعة فوق البنفسجية (UV Index)</h2>
@@ -489,14 +473,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
    <div style="font-size:14px; margin-top:5px; font-weight:bold;" id="uvStatus">جاري التحميل...</div>
    <p style="font-size:12px; color:var(--muted); margin-top:8px; line-height:1.6;" id="uvAdvice">--</p>
   </div>
- </section>
-
- <section class="card">
-  <div class="card-heading">
-   <h2>📡 رادار السحب والأمطار التفاعلي</h2>
-   <span class="muted">بث حي لموقعك</span>
-  </div>
-  <div id="radarMap"></div>
  </section>
 
  <section class="card">
@@ -537,7 +513,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
   رقم المشروع: 166<br>
   إعداد الطالب: مصطفى ماهر عبد المنعم النحاس<br>
   إشراف الدكتور رشدي فاروق<br>
-  بيانات الطقس: Open-Meteo | RainViewer | HTML CSS JavaScript
+  بيانات الطقس: Open-Meteo | HTML CSS JavaScript
  </footer>
 </div>
 
@@ -648,35 +624,6 @@ let lastWeatherData = null;
 let audioCtx = null;
 let rainGainNode = null;
 let isSoundPlaying = false;
-let radarMap = null;
-let radarMarker = null;
-
-function initRadarMap(lat, lon) {
- if (!radarMap) {
-  radarMap = L.map('radarMap').setView([lat, lon], 7);
-  
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-   attribution: '© OpenStreetMap'
-  }).addTo(radarMap);
-
-  fetch('https://api.rainviewer.com/public/weather-maps.json')
-   .then(res => res.json())
-   .then(apiData => {
-    if (apiData && apiData.radar && apiData.radar.past.length > 0) {
-     const lastFrame = apiData.radar.past[apiData.radar.past.length - 1];
-     L.tileLayer(`https://tilecache.rainviewer.com/v2/radar/${lastFrame.time}/256/{z}/{x}/{y}/2/1_1.png`, {
-      opacity: 0.65,
-      zIndex: 10
-     }).addTo(radarMap);
-    }
-   }).catch(e => console.log('Radar error:', e));
-
-  radarMarker = L.marker([lat, lon]).addTo(radarMap);
- } else {
-  radarMap.setView([lat, lon], 7);
-  radarMarker.setLatLng([lat, lon]);
- }
-}
 
 function startWeatherAudio(){
  if(!isSoundPlaying){
@@ -721,7 +668,6 @@ function startWeatherAudio(){
 }
 $("soundBtn").addEventListener("click", startWeatherAudio);
 
-/* ===== المساعد الصوتي بقراءة الطقس (خاصية رقم 4) ===== */
 function speakWeather() {
  if (!('speechSynthesis' in window)) {
   alert("متصفحك لا يدعم خاصية القراءة الصوتية.");
@@ -788,7 +734,6 @@ function updateOutfitAdvisor(temp, code){
  }
 }
 
-/* ===== مؤشر الأشعة فوق البنفسجية واحتياج واقي الشمس (خاصية رقم 2) ===== */
 function updateUVIndex(uv) {
  const uvVal = $("uvValue");
  const uvStat = $("uvStatus");
@@ -889,7 +834,6 @@ async function loadWeather(lat,lon,name){
   lastWeatherData = data;
   renderWeatherDetails(data);
   startLocalClock(data.utc_offset_seconds || 0);
-  initRadarMap(lat, lon);
 
   setStatus("✅ تم تحديث بيانات الطقس");
   loadAirQuality(lat,lon,id);
