@@ -423,7 +423,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
  <div class="extra-controls">
   <div id="localTimeDisplay" class="local-clock">Time: --:--</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;">
-   <!-- زر تبديل اللغة (English / العربية) -->
    <button type="button" class="lang-btn" id="langToggleBtn">🌐 العربية</button>
    <button type="button" class="voice-btn" id="voiceBtn">🗣️ Voice Reader</button>
    <button type="button" class="sound-btn" id="soundBtn">🔊 Rain Sound</button>
@@ -520,7 +519,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
 <script>
 const $=id=>document.getElementById(id);
 let theme="dark";
-let currentLang = "en"; // الافتراضي إنجليزي
+let currentLang = "en";
 
 try{theme=localStorage.getItem("taqsi-theme")||"dark"}catch(e){}
 
@@ -533,7 +532,6 @@ function setTheme(value){
 setTheme(theme);
 $("themeButton").addEventListener("click",()=>setTheme(theme==="dark"?"light":"dark"));
 
-/* القاموس للترجمة بين الإنجليزية والعربية */
 const translations = {
  en: {
   htmlLang: "en", dir: "ltr",
@@ -546,7 +544,7 @@ const translations = {
   openMap: "🗺️ Interactive Governorates Map & Search",
   mapTitle: "🌍 Governorates Map & Finder",
   mapSearchPlaceholder: "Search city on map...",
-  locationBtn: "📍 Use My Current Location",
+  locationButton: "📍 Use My Current Location",
   voiceBtn: "🗣️ Voice Reader",
   soundBtn: "🔊 Rain Sound",
   stopSoundBtn: "🔊 Stop Sound",
@@ -586,7 +584,7 @@ const translations = {
   openMap: "🗺️ خريطة وبحث المحافظات التفاعلي",
   mapTitle: "🌍 خريطة ومحدد المحافظات",
   mapSearchPlaceholder: "ابحث داخل الخريطة عن محافظة أو مدينة...",
-  locationBtn: "📍 استخدام موقعي الحالي",
+  locationButton: "📍 استخدام موقعي الحالي",
   voiceBtn: "🗣️ القارئ الصوتي",
   soundBtn: "🔊 صوت المطر",
   stopSoundBtn: "🔊 إيقاف الصوت",
@@ -620,8 +618,8 @@ const translations = {
 function switchLanguage(lang) {
  currentLang = lang;
  const t = translations[lang];
- $("htmlRoot"].setAttribute("lang", t.htmlLang);
- $("htmlRoot"].setAttribute("dir", t.dir);
+ $("htmlRoot").setAttribute("lang", t.htmlLang);
+ $("htmlRoot").setAttribute("dir", t.dir);
  $("pageTitle").textContent = t.pageTitle;
  $("lblProjectStudent").textContent = t.projectStudent;
  $("lblProjectNumber").textContent = t.projectNumber;
@@ -631,7 +629,7 @@ function switchLanguage(lang) {
  $("openMapBtn").textContent = t.openMap;
  $("mapModalTitle").textContent = t.mapTitle;
  $("mapSearchInput").placeholder = t.mapSearchPlaceholder;
- $("locationButton").textContent = t.locationBtn;
+ $("locationButton").textContent = t.locationButton;
  $("voiceBtn").textContent = t.voiceBtn;
  $("soundBtn").textContent = isSoundPlaying ? t.stopSoundBtn : t.soundBtn;
  $("langToggleBtn").textContent = lang === "en" ? "🌐 العربية" : "🌐 English";
@@ -1043,7 +1041,7 @@ function renderForecast(d){
 
   const name=document.createElement("div");
   name.className="day-name";
-  name.textContent=i===0?(currentLang==="en"?"Today":"اليوم"):dNames[dt.getDay()];
+  name.textContent=i===0?(currentLang === "en"?"Today":"اليوم"):dNames[dt.getDay()];
 
   const dateEl=document.createElement("div");
   dateEl.className="day-date";
