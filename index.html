@@ -66,14 +66,15 @@ button:focus-visible,input:focus-visible{
  to{transform:translateX(80px)}
 }
 
+/* تصميم المطر الخلفي المرئي */
 .effect-rain{
  top:-35px;width:2px;height:22px;border-radius:5px;
  background:linear-gradient(transparent,rgba(182,223,255,0.85));
  box-shadow:0 0 6px rgba(118,186,255,0.4);
  animation:rainFall 0.8s linear infinite;
  z-index:0;
- opacity: 0; /* مخفي افتراضياً لحين حدوث البرق */
- transition: opacity 0.3s ease;
+ opacity: 0; /* مخفي افتراضياً ليظهر ويتوقف مع البرق */
+ transition: opacity 0.4s ease;
 }
 @keyframes rainFall{
  0%{transform:translate3d(0,-5vh,0);opacity:0}
@@ -421,7 +422,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.2;paddi
 
  <div class="project">
   <div class="project-box"><span>طالب المشروع</span><strong>مصطفى ماهر عبد المنعم النحاس</strong></div>
-  <div class="project-box"><span>رقم المشروع 166</span><strong>إشراف الدكتور رشدي فاروق</strong></div>
+  <div class="project-box"><span>رقم المشروع 166</span><span>إشراف الدكتور رشدي فاروق</span></div>
  </div>
 
  <form class="search" id="searchForm">
@@ -655,59 +656,29 @@ let lastWeatherData = null;
 let audioCtx = null;
 let rainGainNode = null;
 let isSoundPlaying = false;
-let userToggledSound = false;
 
-function triggerLightningAndRain() {
+// دالة تفعيل المطر المرئي في الخلفية لمدة 5 ثوانٍ مع البرق
+function triggerRainWithLightning() {
  const flash = $("lightningFlash");
  const rains = document.querySelectorAll('.effect-rain');
  
- // تشغيل وميض البرق (عبر إعادة تشغيل الـ animation)
+ // إعادة تفعيل وميض البرق
  flash.style.animation = 'none';
- flash.offsetHeight; // Trigger reflow
+ flash.offsetHeight; 
  flash.style.animation = 'lightningTimer 10s infinite';
 
- // إظهار المطر لمدة 5 ثوانٍ
- rains.forEach(r => r.style.opacity = '1');
+ // إظهار المطر المرئي في الخلفية
+ rains.notes = rains.forEach(r => r.style.opacity = '1');
 
- // تشغيل صوت المطر لمدة 5 ثوانٍ إذا لم يكن المستخدم قد شغله مسبقاً يدوياً
- let tempAudioCtx = null;
- let tempGain = null;
- try {
-  tempAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const bufferSize = tempAudioCtx.sampleRate * 2;
-  const buffer = tempAudioCtx.createBuffer(1, bufferSize, tempAudioCtx.sampleRate);
-  const output = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; }
-  
-  const whiteNoise = tempAudioCtx.createBufferSource();
-  whiteNoise.buffer = buffer;
-  whiteNoise.loop = true;
-  
-  const filter = tempAudioCtx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 800;
-  
-  tempGain = tempAudioCtx.createGain();
-  tempGain.gain.value = 0.12;
-  
-  whiteNoise.connect(filter);
-  filter.connect(tempGain);
-  tempGain.connect(tempAudioCtx.destination);
-  whiteNoise.start();
- } catch(e) {}
-
- // إيقاف المطر والصوت بعد 5 ثوانٍ بدقة
+ // إخفاء المطر المرئي في الخلفية بعد 5 ثوانٍ بدقة
  setTimeout(() => {
   rains.forEach(r => r.style.opacity = '0');
-  if(tempAudioCtx && !isSoundPlaying) {
-   tempAudioCtx.close();
-  }
  }, 5000);
 }
 
-// جدولة تكرار البرق والمطر كل 10 ثوانٍ ليتزامن مع الوميض المستمر
+// تكرار دورة البرق والمطر المرئي كل 10 ثوانٍ
 setInterval(() => {
- triggerLightningAndRain();
+ triggerRainWithLightning();
 }, 10000);
 
 function startWeatherAudio(){
@@ -862,7 +833,7 @@ function updateWeatherEffects(code,isDay=true){
   rain.style.left=(Math.random()*105-3)+"%";
   rain.style.animationDuration=(0.6+Math.random()*0.5)+"s";
   rain.style.animationDelay=(-Math.random()*3)+"s";
-  rain.style.opacity="0"; // يبدأ مخفياً ليعمل مع البرق
+  rain.style.opacity="0"; // يبدأ المطر الخلفي مخفياً ليتزامن مع البرق
   layer.appendChild(rain);
  }
 }
@@ -937,7 +908,7 @@ function renderWeatherDetails(data){
  updateOutfitAdvisor(c.temperature_2m, c.weather_code);
  updateUVIndex(d.uv_index_max ? d.uv_index_max[0] : null);
 
- // تحديث حالة النقطة التفاعلية
+ // تحديث النقطة التفاعلية
  const dot = $("weatherDot");
  const isCloudy = [1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99].includes(c.weather_code);
  
